@@ -1,0 +1,13 @@
+web.local.config
+logs/
+src/web/*/wwwroot/lib/
+*.csproj.user
+
+PublishProfiles/
+
+.vs
+artifacts/
+packages/
+bin/
+obj/
+node_modules/

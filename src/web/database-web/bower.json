@@ -1,0 +1,7 @@
+{
+	"name": "SAR Database Website",
+	"private": true,
+  "dependencies": {
+    "angular": "^1.5.1"
+  }
+}
