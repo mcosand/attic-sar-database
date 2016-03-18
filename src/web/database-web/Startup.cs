@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Configuration;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
@@ -21,13 +18,13 @@ namespace Sar.Database.Website
       });
       app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
       {
-        Authority = "https://localhost:44300/identity",
-        ClientId = "databaseweb",
-        RedirectUri = "https://localhost:44301/",
+        Authority = ConfigurationManager.AppSettings["auth:authority"].Trim('/') + "/",
+        ClientId = ConfigurationManager.AppSettings["auth:clientId"],
+        RedirectUri = ConfigurationManager.AppSettings["auth:redirect"].Trim('/') + "/",
         ResponseType = "id_token",
         Scope = "openid email profile",
         SignInAsAuthenticationType = "Cookies"
-      });
+        });
     }
   }
 }
