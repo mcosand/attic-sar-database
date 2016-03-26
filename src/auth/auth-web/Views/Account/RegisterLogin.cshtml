@@ -1,0 +1,62 @@
+﻿
+@{
+  ViewBag.Title = "Register";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Register Login</h2>
+<div layout="row">
+<div layout="column" ng-controller="RegisterLoginCtrl" flex-lg="50" ng-init="init(@Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Email))">
+  <p>Welcome @ViewBag.Name!</p>
+  <p>
+    The external login you have used to log into this site is not one that we recognize. Please take a few moments to help us
+    verify your access to this site.
+  </p>
+  <p>
+    Use the form to enter your email address. This address should have already been registered by your unit's administrator.
+    We'll send a verification code to this address and once you enter it in the form below you'll be ready to go!
+  </p>
+
+  <div class="step">
+    <div>
+      <div class="circle">1</div>
+      <div class="line"></div>
+    </div>
+    <div>
+      <div class="title">Send Code to Email</div>
+      <div class="body">
+        <form name="emailForm" method="post" flex="50" layout="column" layout-align="start start" novalidate ng-submit="sendCode()">
+          <md-input-container>
+            <label>Email</label>
+            <input required name="email" type="email" ng-readonly="sending || codeSent" ng-model="model.email" autocomplete="off">
+            <div ng-messages="emailForm.email.$error">
+              <div ng-message="required">Email is required.</div>
+            </div>
+          </md-input-container>
+          <md-button type="submit" ng-disabled="sending || codeSent" class="md-raised md-primary">Send Code<i ng-class="{hidden: !sending}" class="fa fa-fw fa-spin fa-spinner"></i></md-button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="step">
+    <div>
+      <div class="circle">2</div>
+      <div class="line"></div>
+    </div>
+    <div>
+      <div class="title">Enter Verification Code</div>
+      <div class="body">
+        <form name="verifyForm" method="post" flex="60" layout="column" layout-align="start start" novalidate ng-submit="verify()">
+          <md-input-container>
+            <label>Verification Code</label>
+            <input required name="code" type="text" ng-model="model.code" ng-disabled="!codeSent" autocomplete="off">
+            <div ng-messages="verifyForm.code.$error">
+              <div ng-message="required">Verification code is required.</div>
+            </div>
+          </md-input-container>
+          <md-button type="submit" ng-disabled="verifying || !codeSent" class="md-raised md-primary">Verify Code<i ng-class="{hidden: !verifying}" class="fa fa-fw fa-spin fa-spinner"></i></md-button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div></div>

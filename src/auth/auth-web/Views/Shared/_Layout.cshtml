@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@ViewBag.Title - Mvc ViewService Sample</title>
+  @if (string.IsNullOrWhiteSpace(System.Configuration.ConfigurationManager.AppSettings["no-minify"]))
+  {
+    <link href="~/wwwroot/lib/angular-material/angular-material.css" rel="stylesheet" type="text/css" />
+    <link href="~/wwwroot/lib/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css" />
+    <link href="~/wwwroot/css/site.css" rel="stylesheet" type="text/css" />
+    <link href="~/wwwroot/css/vertical-stepper.css" rel="stylesheet" type="text/css" />
+  }
+  else
+  {
+  }
+</head>
+<body layout="row" ng-app="sarAuth" class="ng-cloak">
+  <div layout="column" flex id="content" role="main">
+    <md-toolbar class="md-whiteframe-z1 md-primary">
+      <div class="md-toolbar-tools">
+        @*<md-button class="md-icon-button" aria-label="Settings">
+          <md-icon md-svg-icon="/identity/wwwroot/lib/angular-material/img/icons/menu.svg"></md-icon>
+        </md-button>*@
+        <h2>
+          <strong>King County Search and Rescue</strong>
+        </h2>
+      </div>
+    </md-toolbar>
+    <md-content layout="vertical" flex id="content" layout-padding>
+      <div layout="column" layout-align="center start" layout-fill>
+        @RenderBody()
+      </div>
+    </md-content>
+  </div>
+  <script type="text/javascript">
+    window.appRoot = "@Url.Content("~/")";
+  </script>
+  @if (string.IsNullOrWhiteSpace(System.Configuration.ConfigurationManager.AppSettings["no-minify"]))
+      {
+    <script src="~/wwwroot/lib/angular/angular.js"></script>
+    <script src="~/wwwroot/lib/angular-animate/angular-animate.js"></script>
+    <script src="~/wwwroot/lib/angular-aria/angular-aria.js"></script>
+    <script src="~/wwwroot/lib/angular-messages/angular-messages.js"></script>
+    <script src="~/wwwroot/lib/angular-material/angular-material.js"></script>
+    <script src="~/wwwroot/js/site.js"></script>
+    <script src="~/wwwroot/js/page/login.js"></script>
+    <script src="~/wwwroot/js/page/registerlogin.js"></script>
+  }
+  else
+  {
+  }
+  @RenderSection("scripts", required: false)
+</body>
+</html>

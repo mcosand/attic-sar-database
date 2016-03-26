@@ -1,0 +1,27 @@
+﻿body {
+}
+
+.alert {
+  color: #dd2c00;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+  padding: 15px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.navbar-toggle {
+  min-width: 0;
+}
+
+.ng-cloak {
+  display:none;
+}
+
+.hidden {
+  display: none;
+}
+
+md-input-container {
+  margin-bottom: 0;
+}
