@@ -33,9 +33,7 @@
       </div>
     </md-content>
   </div>
-  <script type="text/javascript">
-    window.appRoot = "@Url.Content("~/")";
-  </script>
+  <script src="~/jsconfig"></script>
   @if (string.IsNullOrWhiteSpace(System.Configuration.ConfigurationManager.AppSettings["no-minify"]))
       {
     <script src="~/wwwroot/lib/angular/angular.js"></script>

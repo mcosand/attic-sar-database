@@ -230,6 +230,8 @@
     <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Cert.cs" />
+    <Compile Include="Controllers\RegisterController.cs" />
+    <Compile Include="Controllers\RootController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Data\ClientRow.cs" />
     <Compile Include="Data\ClientUriRow.cs" />
