@@ -91,7 +91,8 @@ namespace Sar.Auth.Services
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
 
-          claims.Add(new Claim("units", string.Join(",", member.Units.Select(f => f.Name))));
+          claims.Add(new Claim(Scopes.UnitsClaim, string.Join(",", member.Units.Select(f => f.Name))));
+          claims.Add(new Claim(Scopes.MemberIdClaim, member.Id.ToString()));
         }
 
         claims.Add(new Claim(Constants.ClaimTypes.Email, account.Email));

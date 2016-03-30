@@ -8,13 +8,16 @@ namespace Sar.Auth
 {
   public static class Scopes
   {
+    public static readonly string UnitsClaim = "units";
+    public static readonly string MemberIdClaim = "memberId";
+
     public static IEnumerable<Scope> Get()
     {
       return new List<Scope> {
             StandardScopes.OpenId,
             StandardScopes.Profile,
             StandardScopes.Email,
-            new Scope { Name = "units", Type = ScopeType.Identity, Claims = new List<ScopeClaim> { new ScopeClaim("units") } },
+            new Scope { Name = "kcsara-profile", Type = ScopeType.Identity, Claims = new List<ScopeClaim> { new ScopeClaim(UnitsClaim), new ScopeClaim(MemberIdClaim) } },
             new Scope { Name = "truck-api" },
         };
     }

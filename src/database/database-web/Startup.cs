@@ -22,7 +22,7 @@ namespace Sar.Database.Website
         ClientId = ConfigurationManager.AppSettings["auth:clientId"],
         RedirectUri = ConfigurationManager.AppSettings["auth:redirect"].Trim('/') + "/",
         ResponseType = "id_token",
-        Scope = "openid email profile units",
+        Scope = "openid email profile kcsara-profile",
         SignInAsAuthenticationType = "Cookies"
         });
     }
