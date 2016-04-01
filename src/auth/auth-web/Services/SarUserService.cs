@@ -13,6 +13,7 @@ using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services.Default;
 using Sar.Auth.Data;
 using Sar.Services;
+using Serilog;
 
 namespace Sar.Auth.Services
 {
@@ -21,12 +22,14 @@ namespace Sar.Auth.Services
     private readonly IMemberInfoService _memberService;
     private readonly Func<IAuthDbContext> _dbFactory;
     private readonly ISendEmailService _emailService;
+    private readonly ILogger _log;
 
-    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, ISendEmailService email)
+    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, ISendEmailService email, ILogger log)
     {
       _memberService = memberService;
       _dbFactory = dbFactory;
       _emailService = email;
+      _log = log; 
     }
 
     public override async Task AuthenticateExternalAsync(ExternalAuthenticationContext context)
@@ -154,7 +157,13 @@ namespace Sar.Auth.Services
       var existingLogin = await db.ExternalLogins.FirstOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId);
       if (existingLogin != null)
       {
-        throw new InvalidOperationException("Login already registered");
+        throw new UserErrorException("Login already registered", string.Format(
+          "{0} login {1} already registered to account {2} ({3} {4})",
+          existingLogin.Provider,
+          existingLogin.ProviderId,
+          existingLogin.AccountId,
+          existingLogin.Account.FirstName,
+          existingLogin.Account.LastName));
       }
 
       var accounts = await db.Accounts.Where(f => f.Email == email).ToListAsync();
@@ -163,11 +172,11 @@ namespace Sar.Auth.Services
         var members = await _memberService.FindMembersByEmail(email);
         if (members.Count == 0)
         {
-          throw new NotFoundException();
+          throw new NotFoundException(email + " not available for registration", "email", email);
         }
         else if (members.Count > 1)
         {
-          throw new MultipleMatchesException();
+          throw new MultipleMatchesException(email + " not available for registration", "email", email);
         }
         else if (memberAction != null)
         {
@@ -176,7 +185,7 @@ namespace Sar.Auth.Services
       }
       else if (accounts.Count > 1)
       {
-        throw new MultipleMatchesException();
+        throw new MultipleMatchesException(email + " not available for registration", "email", email);
       }
       else if (accountAction != null)
       {

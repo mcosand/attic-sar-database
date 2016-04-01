@@ -25,11 +25,12 @@
     <div>
       <div class="title">Send Code to Email</div>
       <div class="body">
+        <small>This address needs to be already entered in the database by your unit's administrator.</small>
         <form name="emailForm" method="post" flex="50" layout="column" layout-align="start start" novalidate ng-submit="sendCode()">
-          <md-input-container>
+          <md-input-container style="width:15em">
             <label>Email</label>
-            <input required name="email" type="email" ng-readonly="sending || codeSent" ng-model="model.email" autocomplete="off">
-            <div ng-messages="emailForm.email.$error">
+            <input required name="email" type="email" ng-model-options="{'updateOn': 'blur'}" ng-readonly="sending || codeSent" ng-model="model.email" autocomplete="off">
+            <div ng-messages="emailForm.email.$error" ng-if="emailForm.email.$invalid && (emailForm.email.$touched || emailForm.$submitted)">
               <div ng-message="required">Email is required.</div>
             </div>
           </md-input-container>
@@ -47,10 +48,10 @@
       <div class="title">Enter Verification Code</div>
       <div class="body">
         <form name="verifyForm" method="post" flex="60" layout="column" layout-align="start start" novalidate ng-submit="verify()">
-          <md-input-container>
+          <md-input-container style="width:15em">
             <label>Verification Code</label>
             <input required name="code" type="text" ng-model="model.code" ng-disabled="!codeSent" autocomplete="off">
-            <div ng-messages="verifyForm.code.$error">
+            <div ng-messages="verifyForm.code.$error"  ng-if="verifyForm.code.$invalid && (verifyForm.code.$touched || verifyForm.$submitted)">
               <div ng-message="required">Verification code is required.</div>
             </div>
           </md-input-container>

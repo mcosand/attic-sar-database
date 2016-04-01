@@ -1,13 +1,10 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
-using System;
-
 namespace Sar
 {
-  public class NotFoundException : ApplicationException
+  public class NotFoundException : UserErrorException
   {
-    public NotFoundException() : base() { }
-    public NotFoundException(string message) : base(message) { }
+    public NotFoundException(string message, string objectType, string objectKey) : base(message, string.Format("Could not find {0} with key {1}", objectType, objectKey)) { }
   }
 }

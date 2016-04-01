@@ -3,7 +3,10 @@
  */
 using System;
 using System.Configuration;
+using System.Reflection;
+using System.Linq;
 using System.Web;
+using System.Web.Http;
 using IdentityServer3.Core.Configuration;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
@@ -12,10 +15,16 @@ using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Ninject;
+using Ninject.Web.Common.OwinHost;
+using Ninject.Web.WebApi.OwinHost;
 using Owin;
 using Sar.Auth.Controllers;
+using Sar.Auth.Data;
 using Sar.Auth.Services;
+using Sar.Services;
 using Serilog;
+using System.Web.Http.ExceptionHandling;
+using Newtonsoft.Json.Serialization;
 
 [assembly: OwinStartup(typeof(Sar.Auth.Startup))]
 
@@ -25,13 +34,35 @@ namespace Sar.Auth
   {
     internal static IKernel kernel;
 
+    static Startup()
+    {
+      kernel = new StandardKernel();
+      Log.Logger = new LoggerConfiguration()
+                      .MinimumLevel.Debug()
+                      .WriteTo.RollingFile(AppDomain.CurrentDomain.BaseDirectory + "\\logs\\log-{Date}.txt")
+                      .CreateLogger();
+
+      kernel.Bind<ILogger>().ToConstant(Log.Logger);
+      kernel.Bind<SarUserService>().ToSelf();
+      kernel.Bind<IClientStore>().To<SarClientStore>();
+      kernel.Bind<Func<IAuthDbContext>>().ToMethod(ctx => () => new AuthDbContext());
+      kernel.Bind<ISendEmailService>().To<DefaultSendMessageService>().InSingletonScope();
+      kernel.Bind<IConfigService>().To<ConfigService>().InSingletonScope();
+
+      string assemblyNames = ConfigurationManager.AppSettings["diAssemblies"] ?? string.Empty;
+      foreach (var assemblyName in assemblyNames.Split(','))
+      {
+        kernel.Load(Assembly.Load(assemblyName));
+      }
+
+      if (!kernel.GetBindings(typeof(IMemberInfoService)).Any())
+      {
+        kernel.Bind<IMemberInfoService>().To<NullMemberInfoService>();
+      }
+    }
+
     public void Configuration(IAppBuilder app)
     {
-      Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .WriteTo.RollingFile(AppDomain.CurrentDomain.BaseDirectory + "\\logs\\log-{Date}.txt")
-        .CreateLogger();
-
       Action<IAppBuilder> buildApp =
           coreApp =>
           {
@@ -89,6 +120,8 @@ namespace Sar.Auth
             };
 
             coreApp.UseIdentityServer(options);
+
+            SetupWebApi(coreApp);
           };
 
       if (string.IsNullOrWhiteSpace(AuthWebApplication.SITEROOT))
@@ -100,6 +133,26 @@ namespace Sar.Auth
         app.Map("/" + AuthWebApplication.SITEROOT.Trim('/'), buildApp);
       }
     }
+
+    private static void SetupWebApi(IAppBuilder app)
+    {
+      var config = new HttpConfiguration();
+      config.MapHttpAttributeRoutes();
+      var handler = new ApiUserExceptionHandler((IExceptionHandler)config.Services.GetService(typeof(IExceptionHandler)));
+      config.Services.Replace(typeof(IExceptionHandler), handler);
+
+      var formatter = config.Formatters.JsonFormatter;
+      formatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+      app.UseNinjectMiddleware(CreateKernel);
+      app.UseNinjectWebApi(config);
+    }
+
+    private static IKernel CreateKernel()
+    {
+      return kernel;
+    }
+
     public static void ConfigureIdentityProviders(IAppBuilder app, string signInAsType)
     {
       var googleId = ConfigurationManager.AppSettings["google:clientId"];

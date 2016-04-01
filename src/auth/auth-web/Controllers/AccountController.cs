@@ -108,19 +108,5 @@ namespace Sar.Auth.Controllers
     }
 
     #endregion
-
-    /// <summary>
-    /// Loads the HTML for the error page.
-    /// </summary>
-    /// <param name="model">
-    /// The model.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ActionResult"/>.
-    /// </returns>
-    public virtual ActionResult Error(ErrorViewModel model)
-    {
-      return this.View(model);
-    }
   }
 }

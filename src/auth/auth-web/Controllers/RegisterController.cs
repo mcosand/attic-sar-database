@@ -1,26 +1,25 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using IdentityServer3.Core;
-using IdentityServer3.Core.Extensions;
-using IdentityServer3.Core.ViewModels;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Sar.Auth.Models;
-using Sar.Auth.Services;
-
 namespace Sar.Auth.Controllers
 {
+  using System.Threading.Tasks;
+  using System.Web;
+  using System.Web.Mvc;
+  using IdentityServer3.Core;
+  using IdentityServer3.Core.Extensions;
+  using Sar.Auth.Services;
+  using Serilog;
+
   public class RegisterController : Controller
   {
+    private readonly ILogger _log;
     private readonly SarUserService _userService;
 
-    public RegisterController(SarUserService service)
+    public RegisterController(SarUserService service, ILogger log)
     {
       _userService = service;
+      _log = log;
     }
 
     // GET: Account
@@ -48,60 +47,6 @@ namespace Sar.Auth.Controllers
       ViewBag.Name = partial_login.FindFirst(Constants.ClaimTypes.Name)?.Value ?? "Unknown User";
 
       return View();
-    }
-    [HttpPost]
-    [Route(AuthWebApplication.SITEROOT + "externalVerificationCode")]
-    public async Task<ActionResult> ExternalVerificationCode(VerifyCodeRequest request)
-    {
-      var ctx = Request.GetOwinContext();
-      var partial_login = await ctx.Environment.GetIdentityServerPartialLoginAsync();
-      if (partial_login == null)
-      {
-        return View("Error");
-      }
-
-      await _userService.SendExternalVerificationCode(partial_login, request.Email);
-
-      //using (var db = )
-      return CamelJson(new { Success = true });
-    }
-
-    [HttpPost]
-    [Route(AuthWebApplication.SITEROOT + "verifyExternalCode")]
-    public async Task<ActionResult> VerifyExternalCode(VerifyCodeRequest request)
-    {
-      var ctx = Request.GetOwinContext();
-      var partial_login = await ctx.Environment.GetIdentityServerPartialLoginAsync();
-      if (partial_login == null)
-      {
-        return View("Error");
-      }
-
-      await _userService.VerifyExternalCode(partial_login, request.Email, request.Code);
-
-      var resumeUrl = await ctx.Environment.GetPartialLoginResumeUrlAsync();
-      return CamelJson(new { Success = true, Url = resumeUrl });
-    }
-
-    /// <summary>
-    /// Loads the HTML for the error page.
-    /// </summary>
-    /// <param name="model">
-    /// The model.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ActionResult"/>.
-    /// </returns>
-    public virtual ActionResult Error(ErrorViewModel model)
-    {
-      return this.View(model);
-    }
-
-    private ContentResult CamelJson(object o)
-    {
-      var camelCaseFormatter = new JsonSerializerSettings();
-      camelCaseFormatter.ContractResolver = new CamelCasePropertyNamesContractResolver();
-      return Content(JsonConvert.SerializeObject(o, camelCaseFormatter), "application/json");
     }
   }
 }

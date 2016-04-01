@@ -1,13 +1,10 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
-using System;
-
 namespace Sar
 {
-  public class MultipleMatchesException : ApplicationException
+  public class MultipleMatchesException : UserErrorException
   {
-    public MultipleMatchesException() : base() { }
-    public MultipleMatchesException(string message) : base(message) { }
+    public MultipleMatchesException(string message, string objectType, string objectKey) : base(message, string.Format("Found multiple matching {0} with key {1}", objectType, objectKey)) { }
   }
 }

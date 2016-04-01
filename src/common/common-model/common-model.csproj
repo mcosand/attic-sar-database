@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Exceptions\NotFoundException.cs" />
     <Compile Include="Exceptions\MultipleMatchesException.cs" />
+    <Compile Include="Exceptions\UserErrorException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

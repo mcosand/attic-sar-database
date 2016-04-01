@@ -24,7 +24,7 @@
       }).then(function (resp) {
         if (resp.data.success == true) { $scope.codeSent = true; }
       }, function (resp) {
-        alert('Error: ' + resp.statusText);
+        alert('Error: ' + resp.data);
       })['finally'](function () {
         $scope.sending = false;
       })
@@ -39,7 +39,7 @@
         if (resp.data.success)
           $window.location.href = resp.data.url;
       }, function (resp) {
-        alert('Error: ' + resp.statusText);
+        alert('Error: ' + resp.data);
       })['finally'](function () {
         $scope.verifying = false;
       })
