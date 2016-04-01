@@ -12,36 +12,39 @@ namespace Sar.Auth
 
   public class ApiUserExceptionHandler : IExceptionHandler
   {
-    private readonly IExceptionHandler _next;
-
-    public ApiUserExceptionHandler(IExceptionHandler next)
-    {
-      _next = next;
-    }
-
     public Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
     {
       var exception = context.Exception as UserErrorException;
       if (exception == null)
       {
-        return _next.HandleAsync(context, cancellationToken);
+        context.Result = new TextPlainErrorResult(context.ExceptionContext.Request, HttpStatusCode.InternalServerError, "A server error has occurred.");
+        return Task.FromResult(0);
       }
       else
       {
-        context.Result = new TextPlainErrorResult { Request = context.ExceptionContext.Request, Content = exception.ExternalMessage };
+        context.Result = new TextPlainErrorResult(context.ExceptionContext.Request, HttpStatusCode.BadRequest, exception.ExternalMessage);
         return Task.FromResult(0);
       }
     }
 
     private class TextPlainErrorResult : IHttpActionResult
     {
+      public TextPlainErrorResult(HttpRequestMessage request, HttpStatusCode status, string content)
+      {
+        Request = request;
+        Status = status;
+        Content = content;
+      }
+
       public HttpRequestMessage Request { get; set; }
 
       public string Content { get; set; }
 
+      public HttpStatusCode Status { get; set; }
+
       public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
       {
-        HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        HttpResponseMessage response = new HttpResponseMessage(Status);
         response.Content = new StringContent(Content);
         response.RequestMessage = Request;
         return Task.FromResult(response);

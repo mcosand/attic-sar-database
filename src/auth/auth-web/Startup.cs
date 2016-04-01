@@ -34,11 +34,13 @@ namespace Sar.Auth
   {
     public void Configuration(IAppBuilder app)
     {
-      var kernel = SetupDependencyInjection();
 
       Action<IAppBuilder> buildApp =
           coreApp =>
           {
+            var kernel = SetupDependencyInjection();
+            SetupWebApi(coreApp, kernel);
+
             var userService = kernel.Get<SarUserService>();
             var clientStore = kernel.Get<IClientStore>();
             var corsService = new DefaultCorsPolicyService { AllowAll = true };
@@ -94,7 +96,7 @@ namespace Sar.Auth
 
             coreApp.UseIdentityServer(options);
 
-            SetupWebApi(coreApp, kernel);
+
           };
 
       if (string.IsNullOrWhiteSpace(AuthWebApplication.SITEROOT))
@@ -144,8 +146,8 @@ namespace Sar.Auth
     {
       var config = new HttpConfiguration();
       config.MapHttpAttributeRoutes();
-      var handler = new ApiUserExceptionHandler((IExceptionHandler)config.Services.GetService(typeof(IExceptionHandler)));
-      config.Services.Replace(typeof(IExceptionHandler), handler);
+      config.Services.Replace(typeof(IExceptionHandler), new ApiUserExceptionHandler());
+      config.Services.Add(typeof(IExceptionLogger), kernel.Get<ApiExceptionLogger>());
 
       var formatter = config.Formatters.JsonFormatter;
       formatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

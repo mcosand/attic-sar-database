@@ -261,6 +261,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiExceptionLogger.cs" />
     <Compile Include="ApiUserExceptionHandler.cs" />
     <Compile Include="Controllers\ApiController.cs" />
     <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
