@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Extensions;
@@ -70,9 +72,70 @@ namespace Sar.Auth.Services
       }
     }
 
-    public override Task AuthenticateLocalAsync(LocalAuthenticationContext context)
+    public override async Task AuthenticateLocalAsync(LocalAuthenticationContext context)
     {
-      return base.AuthenticateLocalAsync(context);
+      context.AuthenticateResult = new AuthenticateResult("Username or password is not correct.");
+
+      using (var db = _dbFactory())
+      {
+        var account = await db.Accounts
+          .Where(f => f.Username == context.UserName)
+          .SingleOrDefaultAsync();
+
+        if (account != null && !string.IsNullOrWhiteSpace(account.PasswordHash))
+        {
+          if (!PasswordsMatch(context.Password, account.PasswordHash))
+          {
+            context.AuthenticateResult = new AuthenticateResult("Username or password is not correct.");
+            return;
+          }
+
+          if (account.Locked.HasValue)
+          {
+            context.AuthenticateResult = new AuthenticateResult("Account is locked");
+            return;
+          }
+
+          if (account.MemberId.HasValue)
+          {
+            var member = await _memberService.GetMember(account.MemberId.Value);
+            if (member == null)
+            {
+              context.AuthenticateResult = new AuthenticateResult("Account is locked");
+              return;
+            }
+            if (account.FirstName != member.FirstName || account.LastName != member.LastName || account.Email != member.Email)
+            {
+              account.FirstName = member.FirstName;
+              account.LastName = member.LastName;
+              account.Email = member.Email;
+              await db.SaveChangesAsync();
+            }
+          }
+
+          if (string.IsNullOrWhiteSpace(account.FirstName) || string.IsNullOrWhiteSpace(account.LastName))
+          {
+            _log.Error("Account {username} has no first or last name set", account.Username);
+          }
+          context.AuthenticateResult = new AuthenticateResult(account.Id.ToString(), string.Format("{0} {1}", account.FirstName, account.LastName));
+        }
+      }
+    }
+
+    public const int PasswordSaltLength = 24;
+    public bool PasswordsMatch(string password, string hashedPassword)
+    {
+      var salt = hashedPassword.Substring(0, PasswordSaltLength);
+
+      byte[] bytes = Encoding.Unicode.GetBytes(password);
+      byte[] src = Convert.FromBase64String(salt);
+      byte[] dst = new byte[src.Length + bytes.Length];
+      Buffer.BlockCopy(src, 0, dst, 0, src.Length);
+      Buffer.BlockCopy(bytes, 0, dst, src.Length, bytes.Length);
+      HashAlgorithm algorithm = HashAlgorithm.Create("SHA1");
+      byte[] inArray = algorithm.ComputeHash(dst);
+      var hashed = Convert.ToBase64String(inArray);
+      return string.Equals(hashedPassword.Substring(PasswordSaltLength), hashed);
     }
 
     public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
