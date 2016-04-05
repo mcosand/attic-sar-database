@@ -48,7 +48,7 @@ namespace Sar.Auth.Services
         {
           if (account.Locked.HasValue)
           {
-            context.AuthenticateResult = new AuthenticateResult("Account is locked");
+            context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
           }
           else
           {
@@ -58,7 +58,7 @@ namespace Sar.Auth.Services
               var member = await _memberService.GetMember(account.MemberId.Value);
               if (member == null)
               {
-                throw new InvalidOperationException("Member not found in database");
+                throw new InvalidOperationException(LogStrings.MemberNotFound);
               }
               name = member.FirstName + " " + member.LastName;
             }
@@ -74,7 +74,7 @@ namespace Sar.Auth.Services
 
     public override async Task AuthenticateLocalAsync(LocalAuthenticationContext context)
     {
-      context.AuthenticateResult = new AuthenticateResult("Username or password is not correct.");
+      context.AuthenticateResult = new AuthenticateResult(Strings.UserPasswordNotCorrect);
 
       using (var db = _dbFactory())
       {
@@ -86,13 +86,14 @@ namespace Sar.Auth.Services
         {
           if (!PasswordsMatch(context.Password, account.PasswordHash))
           {
-            context.AuthenticateResult = new AuthenticateResult("Username or password is not correct.");
+            context.AuthenticateResult = new AuthenticateResult(Strings.UserPasswordNotCorrect);
             return;
           }
 
           if (account.Locked.HasValue)
           {
-            context.AuthenticateResult = new AuthenticateResult("Account is locked");
+            _log.Warning(LogStrings.LockedAccountAttempt, account);
+            context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
             return;
           }
 
@@ -101,7 +102,7 @@ namespace Sar.Auth.Services
             var member = await _memberService.GetMember(account.MemberId.Value);
             if (member == null)
             {
-              context.AuthenticateResult = new AuthenticateResult("Account is locked");
+              context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
               return;
             }
             if (account.FirstName != member.FirstName || account.LastName != member.LastName || account.Email != member.Email)
@@ -115,7 +116,7 @@ namespace Sar.Auth.Services
 
           if (string.IsNullOrWhiteSpace(account.FirstName) || string.IsNullOrWhiteSpace(account.LastName))
           {
-            _log.Error("Account {username} has no first or last name set", account.Username);
+            _log.Error(LogStrings.AccountHasNoName, account.Username);
           }
           context.AuthenticateResult = new AuthenticateResult(account.Id.ToString(), string.Format("{0} {1}", account.FirstName, account.LastName));
         }
@@ -123,10 +124,9 @@ namespace Sar.Auth.Services
     }
 
     public const int PasswordSaltLength = 24;
-    public bool PasswordsMatch(string password, string hashedPassword)
-    {
-      var salt = hashedPassword.Substring(0, PasswordSaltLength);
 
+    public static string HashPassword(string password, string salt)
+    {
       byte[] bytes = Encoding.Unicode.GetBytes(password);
       byte[] src = Convert.FromBase64String(salt);
       byte[] dst = new byte[src.Length + bytes.Length];
@@ -134,7 +134,13 @@ namespace Sar.Auth.Services
       Buffer.BlockCopy(bytes, 0, dst, src.Length, bytes.Length);
       HashAlgorithm algorithm = HashAlgorithm.Create("SHA1");
       byte[] inArray = algorithm.ComputeHash(dst);
-      var hashed = Convert.ToBase64String(inArray);
+      return Convert.ToBase64String(inArray);
+    }
+
+    public static bool PasswordsMatch(string password, string hashedPassword)
+    {
+      var salt = hashedPassword.Substring(0, PasswordSaltLength);
+      var hashed = HashPassword(password, salt);
       return string.Equals(hashedPassword.Substring(PasswordSaltLength), hashed);
     }
 
@@ -153,7 +159,7 @@ namespace Sar.Auth.Services
           var member = await _memberService.GetMember(account.MemberId.Value);
           if (member == null)
           {
-            throw new InvalidOperationException("Member not found in database");
+            throw new InvalidOperationException(LogStrings.MemberNotFound);
           }
           account.Email = member.Email;
           account.FirstName = member.FirstName;
@@ -195,7 +201,7 @@ namespace Sar.Auth.Services
         var verification = await db.Verifications.FirstOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId && f.Email == email);
         if (verification == null || verification.Code != code)
         {
-          _log.Information("Verification code {verifyCode} for {email} is not correct", code, email);
+          _log.Information(LogStrings.VerificationCodeNotCorrect, code, email);
           return ProcessVerificationResult.InvalidVerifyCode;
         }
 
@@ -217,7 +223,7 @@ namespace Sar.Auth.Services
         var login = new ExternalLoginRow { Account = account, Provider = provider, ProviderId = providerUserId };
         db.ExternalLogins.Add(login);
         db.Verifications.Remove(verification);
-        _log.Information("Associating login {provider}:{providerId} with {name}'s account", provider, providerUserId, account.FirstName + " " + account.LastName);
+        _log.Information(LogStrings.AssociatingExternalLogin, provider, providerUserId, account.FirstName + " " + account.LastName);
         await db.SaveChangesAsync();
 
         return ProcessVerificationResult.Success;
@@ -230,7 +236,7 @@ namespace Sar.Auth.Services
       var existingLogin = await db.ExternalLogins.FirstOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId);
       if (existingLogin != null)
       {
-        _log.Warning("{provider} login {providerId} already registered to account {account} ({first} {last}",
+        _log.Warning(LogStrings.AlreadyRegistered,
           existingLogin.Provider,
           existingLogin.ProviderId,
           existingLogin.AccountId,
@@ -245,12 +251,12 @@ namespace Sar.Auth.Services
         var members = await _memberService.FindMembersByEmail(email);
         if (members.Count == 0)
         {
-          _log.Warning("{email} does not exist in the database", email);
+          _log.Warning(LogStrings.EmailNotFound, email);
           return ProcessVerificationResult.EmailNotAvailable;
         }
         else if (members.Count > 1)
         {
-          _log.Warning("{email} exists for multiple members: {@members}", email, members.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
+          _log.Warning(LogStrings.MultipleMembersForEmail, email, members.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
           return ProcessVerificationResult.EmailNotAvailable;
         }
         else if (memberAction != null)
@@ -260,7 +266,7 @@ namespace Sar.Auth.Services
       }
       else if (accounts.Count > 1)
       {
-        _log.Warning("{email} exists for multiple accounts: {@accounts}", email, accounts.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
+        _log.Warning(LogStrings.MultipleAccountsForEmail, email, accounts.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
         return ProcessVerificationResult.EmailNotAvailable;
       }
       else if (accountAction != null)
@@ -299,8 +305,8 @@ namespace Sar.Auth.Services
         verification.Email = email;
         await db.SaveChangesAsync();
 
-        _log.Information("Sending verification code to {email} for login {provider}:{providerId}", email, provider, providerUserId);
-        await _emailService.SendEmail(email, "KCSARA Verification Code", "Your code: " + verification.Code);
+        _log.Information(LogStrings.SendingVerifyCode, email, provider, providerUserId);
+        await _emailService.SendEmail(email, Strings.VerifyMessageSubject, string.Format(Strings.VerifyMessageHtml, verification.Code));
 
         return ProcessVerificationResult.Success;
       }

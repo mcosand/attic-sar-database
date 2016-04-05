@@ -3,6 +3,7 @@
  */
 using System;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -25,6 +26,7 @@ using Sar.Web;
 
 namespace Sar.Auth
 {
+  [ExcludeFromCodeCoverage]
   public sealed class Startup
   {
     public void Configuration(IAppBuilder app)

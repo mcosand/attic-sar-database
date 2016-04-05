@@ -22,6 +22,7 @@
 
     private Dictionary<Type, object> _tables { get; set; }
 
+    public int SaveChangesCount { get; set; }
 
     public InMemoryDbSet<TRow> GetTable<TRow>() where TRow : class
     {
@@ -148,7 +149,7 @@
         saveParameter
         );
 
-      Setup(saveChangesLambda).Callback(ResolveEntities).Returns(Task.FromResult(1));
+      Setup(saveChangesLambda).Callback(() => { SaveChangesCount++; ResolveEntities(); }).Returns(Task.FromResult(1));
 
 
       _tables = new Dictionary<Type, object>();

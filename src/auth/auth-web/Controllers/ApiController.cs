@@ -4,7 +4,6 @@
 namespace Sar.Auth
 {
   using System;
-  using System.Net;
   using System.Net.Http;
   using System.Threading.Tasks;
   using System.Web;
@@ -33,7 +32,7 @@ namespace Sar.Auth
       var partial_login = await ctx.Environment.GetIdentityServerPartialLoginAsync();
       if (partial_login == null)
       {
-        throw new UserErrorException("Not logged in with external login.");
+        throw new UserErrorException(Strings.NotLoggedInExternalLogin);
       }
 
       var processResult = await _userService.SendExternalVerificationCode(partial_login, request.Email);
@@ -49,7 +48,7 @@ namespace Sar.Auth
       var partial_login = await ctx.Environment.GetIdentityServerPartialLoginAsync();
       if (partial_login == null)
       {
-        throw new UserErrorException("Not logged in with external login.");
+        throw new UserErrorException(Strings.NotLoggedInExternalLogin);
       }
 
       var processResult = await _userService.VerifyExternalCode(partial_login, request.Email, request.Code);
@@ -67,16 +66,16 @@ namespace Sar.Auth
           result = success;
           break;
         case ProcessVerificationResult.AlreadyRegistered:
-          result = new { Success = false, Errors = new { _ = new[] { "Login is already registered" } } };
+          result = new { Success = false, Errors = new { _ = new[] { Strings.ExternalLoginAlreadyRegistered } } };
           break;
         case ProcessVerificationResult.EmailNotAvailable:
-          result = new { Success = false, Errors = new { Email = new[] { request.Email + " is not available for registration" } } };
+          result = new { Success = false, Errors = new { Email = new[] { string.Format(Strings.ExternalLoginNotAvailable, request.Email) } } };
           break;
         case ProcessVerificationResult.InvalidVerifyCode:
-          result = new { Success = false, Errors = new { Code = new[] { "Verification code not found or is invalid" } } };
+          result = new { Success = false, Errors = new { Code = new[] { Strings.BadVerification } } };
           break;
         default:
-          throw new NotImplementedException("Don't know how to handle verification result " + processResult);
+          throw new NotImplementedException(string.Format(LogStrings.UnknownProcessVerification, processResult));
       }
 
       return result;

@@ -44,7 +44,7 @@ namespace Sar.Auth.Controllers
 
       ViewBag.Email = (partial_login.FindFirst(Constants.ClaimTypes.Email)
                    ?? partial_login.FindFirst("upn"))?.Value;
-      ViewBag.Name = partial_login.FindFirst(Constants.ClaimTypes.Name)?.Value ?? "Unknown User";
+      ViewBag.Name = partial_login.FindFirst(Constants.ClaimTypes.Name)?.Value ?? Strings.UnknownUserName;
 
       return View();
     }

@@ -14,6 +14,7 @@ namespace Sar.Auth.Services
   using System.Collections.Generic;
   using System.ComponentModel;
   using System.Diagnostics;
+  using System.Diagnostics.CodeAnalysis;
   using System.IO;
   using System.Linq;
   using System.Net;
@@ -47,6 +48,7 @@ namespace Sar.Auth.Services
   ///     to the default IdentityServer ViewService implementation 
   /// </summary>
   /// <typeparam name="TController">The MVC Controller that handles the various Logon screens</typeparam>
+  [ExcludeFromCodeCoverage]
   public class MvcViewService<TController> : IViewService
       where TController : ControllerBase
   {

@@ -104,11 +104,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SignIn\LocalLoginTests.cs" />
     <Compile Include="TestDb.cs" />
     <Compile Include="InMemoryDbSet.cs" />
-    <Compile Include="SarUserServiceRegistrationTests.cs" />
+    <Compile Include="Registration\ExternalRegistrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDbAsyncQueryable.cs" />
+    <Compile Include="UserServiceBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -139,9 +141,7 @@
       <Name>common-web</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Registration\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

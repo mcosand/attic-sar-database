@@ -14,7 +14,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sar.Auth</RootNamespace>
-    <AssemblyName>SarDatabase.AuthWeb</AssemblyName>
+    <AssemblyName>Sar.AuthWeb</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort>44300</IISExpressSSLPort>
@@ -239,8 +239,16 @@
     <Content Include=".bowerrc" />
     <Content Include="bower.json" />
     <Content Include="Views\Register\RegisterLogin.cshtml" />
+    <EmbeddedResource Include="LogStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201603242356298_Initial.resx">
       <DependentUpon>201603242356298_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
     <None Include="Web.Debug.config">
@@ -274,6 +282,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="LogStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LogStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\201603242356298_Initial.cs" />
     <Compile Include="Migrations\201603242356298_Initial.Designer.cs">
       <DependentUpon>201603242356298_Initial.cs</DependentUpon>
@@ -287,6 +300,11 @@
     <Compile Include="Services\SarClientStore.cs" />
     <Compile Include="Services\SarUserService.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\common\common-model\common-model.csproj">
