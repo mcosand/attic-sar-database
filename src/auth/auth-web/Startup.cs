@@ -6,8 +6,6 @@ using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
-using System.Web.Http.ExceptionHandling;
 using IdentityServer3.Core.Configuration;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
@@ -15,16 +13,13 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
 using Microsoft.Owin.Security.OpenIdConnect;
-using Newtonsoft.Json.Serialization;
 using Ninject;
-using Ninject.Web.Common;
-using Ninject.Web.WebApi;
 using Owin;
 using Sar.Auth.Controllers;
 using Sar.Auth.Data;
 using Sar.Auth.Services;
 using Sar.Services;
-using Serilog;
+using Sar.Web;
 
 [assembly: OwinStartup(typeof(Sar.Auth.Startup))]
 
@@ -38,8 +33,7 @@ namespace Sar.Auth
       Action<IAppBuilder> buildApp =
           coreApp =>
           {
-            var kernel = SetupDependencyInjection();
-            SetupWebApi(coreApp, kernel);
+            var kernel = WebSetup.SetupDependencyInjection(RegisterServices);
 
             var userService = kernel.Get<SarUserService>();
             var clientStore = kernel.Get<IClientStore>();
@@ -96,7 +90,8 @@ namespace Sar.Auth
 
             coreApp.UseIdentityServer(options);
 
-
+            // This must come after .UseIdentityServer so APIs can get identity values off the OWIN context
+            WebSetup.SetupWebApi(app, kernel);
           };
 
       if (string.IsNullOrWhiteSpace(AuthWebApplication.SITEROOT))
@@ -109,26 +104,17 @@ namespace Sar.Auth
       }
     }
 
-    private static IKernel SetupDependencyInjection()
+    private static void RegisterServices(IKernel kernel)
     {
-      var kernel = new StandardKernel();
-      var bootstrapper = new Bootstrapper();
-      bootstrapper.Initialize(() => kernel);
-      kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
-
-      Log.Logger = new LoggerConfiguration()
-          .MinimumLevel.Debug()
-          .WriteTo.RollingFile(AppDomain.CurrentDomain.BaseDirectory + "\\logs\\log-{Date}.txt")
-          .CreateLogger();
-
-      kernel.Bind<ILogger>().ToConstant(Log.Logger);
       kernel.Bind<SarUserService>().ToSelf();
       kernel.Bind<IClientStore>().To<SarClientStore>();
       kernel.Bind<Func<IAuthDbContext>>().ToMethod(ctx => () => new AuthDbContext());
       kernel.Bind<ISendEmailService>().To<DefaultSendMessageService>().InSingletonScope();
       kernel.Bind<IConfigService>().To<ConfigService>().InSingletonScope();
 
-      string assemblyNames = ConfigurationManager.AppSettings["diAssemblies"] ?? string.Empty;
+      var config = kernel.Get<IConfigService>();
+
+      string assemblyNames = config["diAssemblies"] ?? string.Empty;
       foreach (var assemblyName in assemblyNames.Split(','))
       {
         kernel.Load(Assembly.Load(assemblyName));
@@ -138,22 +124,6 @@ namespace Sar.Auth
       {
         kernel.Bind<IMemberInfoService>().To<NullMemberInfoService>();
       }
-
-      return kernel;
-    }
-
-    private static void SetupWebApi(IAppBuilder app, IKernel kernel)
-    {
-      var config = new HttpConfiguration();
-      config.MapHttpAttributeRoutes();
-      config.Services.Replace(typeof(IExceptionHandler), new ApiUserExceptionHandler());
-      config.Services.Add(typeof(IExceptionLogger), kernel.Get<ApiExceptionLogger>());
-
-      var formatter = config.Formatters.JsonFormatter;
-      formatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
-      config.DependencyResolver = new NinjectDependencyResolver(kernel);
-      app.UseWebApi(config);
     }
 
     public static void ConfigureIdentityProviders(IAppBuilder app, string signInAsType)

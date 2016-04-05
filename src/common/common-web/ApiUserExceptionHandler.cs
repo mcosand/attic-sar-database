@@ -1,7 +1,7 @@
 ﻿/*
  * Copyright Matthew Cosand
   */
-namespace Sar.Auth
+namespace Sar.Web
 {
   using System.Net;
   using System.Net.Http;

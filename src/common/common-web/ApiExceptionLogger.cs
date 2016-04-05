@@ -1,7 +1,7 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
-namespace Sar.Auth
+namespace Sar.Web
 {
   using System.Security.Claims;
   using System.Threading;
