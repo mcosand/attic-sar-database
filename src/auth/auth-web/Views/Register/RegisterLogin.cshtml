@@ -25,13 +25,14 @@
     <div>
       <div class="title">Send Code to Email</div>
       <div class="body">
-        <small>This address needs to be already entered in the database by your unit's administrator.</small>
+        <small><i ng-if="emailForm.email.$error.server" class="fa fa-asterisk text-danger"> </i>This address needs to be already entered in the database by your unit's administrator.</small>
         <form name="emailForm" method="post" flex="50" layout="column" layout-align="start start" novalidate ng-submit="sendCode()">
           <md-input-container style="width:15em">
             <label>Email</label>
-            <input required name="email" type="email" ng-model-options="{'updateOn': 'blur'}" ng-readonly="sending || codeSent" ng-model="model.email" autocomplete="off">
+            <input name="email" type="email" ng-model-options="{'updateOn': 'blur'}" ng-readonly="sending || codeSent" ng-model="model.email" autocomplete="off" required server-error>
             <div ng-messages="emailForm.email.$error" ng-if="emailForm.email.$invalid && (emailForm.email.$touched || emailForm.$submitted)">
-              <div ng-message="required">Email is required.</div>
+              <div ng-message="server" ng-show="emailForm.email.$error.server">{{serverErrors.email}}</div>
+              <div ng-message="required" ng-show="emailForm.email.$error.required">Email is required.</div>
             </div>
           </md-input-container>
           <md-button type="submit" ng-disabled="sending || codeSent" class="md-raised md-primary">Send Code<i ng-class="{hidden: !sending}" class="fa fa-fw fa-spin fa-spinner"></i></md-button>
@@ -50,9 +51,10 @@
         <form name="verifyForm" method="post" flex="60" layout="column" layout-align="start start" novalidate ng-submit="verify()">
           <md-input-container style="width:15em">
             <label>Verification Code</label>
-            <input required name="code" type="text" ng-model="model.code" ng-disabled="!codeSent" autocomplete="off">
-            <div ng-messages="verifyForm.code.$error"  ng-if="verifyForm.code.$invalid && (verifyForm.code.$touched || verifyForm.$submitted)">
-              <div ng-message="required">Verification code is required.</div>
+            <input name="code" type="text" ng-model="model.code" ng-disabled="!codeSent" autocomplete="off" required server-error>
+            <div ng-messages="verifyForm.code.$error" ng-if="verifyForm.code.$invalid && (verifyForm.code.$touched || verifyForm.$submitted)">
+              <div ng-message="server" ng-show="verifyForm.code.$error.server">{{serverErrors.code}}</div>
+              <div ng-message="required" ng-show="emailForm.email.$error.required">Verification code is required.</div>
             </div>
           </md-input-container>
           <md-button type="submit" ng-disabled="verifying || !codeSent" class="md-raised md-primary">Verify Code<i ng-class="{hidden: !verifying}" class="fa fa-fw fa-spin fa-spinner"></i></md-button>

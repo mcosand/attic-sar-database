@@ -28,7 +28,6 @@ namespace Sar.Web
       var kernel = new StandardKernel();
       var bootstrapper = new Bootstrapper();
       bootstrapper.Initialize(() => kernel);
-    //  kernel.Bind<Func<IKernel>>().ToConstant((Func<IKernel>)(() => kernel));
       kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
 
       Log.Logger = new LoggerConfiguration()

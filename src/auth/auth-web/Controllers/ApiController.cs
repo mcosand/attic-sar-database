@@ -3,6 +3,7 @@
  */
 namespace Sar.Auth
 {
+  using System;
   using System.Net;
   using System.Net.Http;
   using System.Threading.Tasks;
@@ -35,9 +36,9 @@ namespace Sar.Auth
         throw new UserErrorException("Not logged in with external login.");
       }
 
-      await _userService.SendExternalVerificationCode(partial_login, request.Email);
+      var processResult = await _userService.SendExternalVerificationCode(partial_login, request.Email);
 
-      return new { Success = true };
+      return ServiceResultToObject(request, processResult, new { Success = true });
     }
 
     [HttpPost]
@@ -51,11 +52,34 @@ namespace Sar.Auth
         throw new UserErrorException("Not logged in with external login.");
       }
 
-      await _userService.VerifyExternalCode(partial_login, request.Email, request.Code);
+      var processResult = await _userService.VerifyExternalCode(partial_login, request.Email, request.Code);
 
       var resumeUrl = await ctx.Environment.GetPartialLoginResumeUrlAsync();
-      return new { Success = true, Url = resumeUrl };
+      return ServiceResultToObject(request, processResult, new { Success = true, Url = resumeUrl });
     }
 
+    private static object ServiceResultToObject(VerifyCodeRequest request, ProcessVerificationResult processResult, object success)
+    {
+      object result;
+      switch (processResult)
+      {
+        case ProcessVerificationResult.Success:
+          result = success;
+          break;
+        case ProcessVerificationResult.AlreadyRegistered:
+          result = new { Success = false, Errors = new { _ = new[] { "Login is already registered" } } };
+          break;
+        case ProcessVerificationResult.EmailNotAvailable:
+          result = new { Success = false, Errors = new { Email = new[] { request.Email + " is not available for registration" } } };
+          break;
+        case ProcessVerificationResult.InvalidVerifyCode:
+          result = new { Success = false, Errors = new { Code = new[] { "Verification code not found or is invalid" } } };
+          break;
+        default:
+          throw new NotImplementedException("Don't know how to handle verification result " + processResult);
+      }
+
+      return result;
+    }
   }
 }

@@ -32,6 +32,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common-services", "src\comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common-web", "src\common\common-web\common-web.csproj", "{9515E2EF-3FE0-40B7-ABFE-BD95002B68B4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A87C54CD-FFA3-454E-8B90-24C374E1BA24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "auth-tests", "test\auth-tests\auth-tests.csproj", "{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +91,12 @@ Global
 		{9515E2EF-3FE0-40B7-ABFE-BD95002B68B4}.Deploy|Any CPU.Build.0 = Debug|Any CPU
 		{9515E2EF-3FE0-40B7-ABFE-BD95002B68B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9515E2EF-3FE0-40B7-ABFE-BD95002B68B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Deploy|Any CPU.Build.0 = Debug|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,5 +114,6 @@ Global
 		{472712E1-9993-4AD9-BE39-BEA42C27573F} = {41A0DD65-A1A7-4D6F-B34D-9FCBC56A8F66}
 		{E653C022-5018-44EF-B4A7-495EEE77B348} = {E4FB472D-7E30-47BD-B890-6796A62A7914}
 		{9515E2EF-3FE0-40B7-ABFE-BD95002B68B4} = {E4FB472D-7E30-47BD-B890-6796A62A7914}
+		{3570BE3A-3CEC-4781-9ED1-34F95A11D27C} = {A87C54CD-FFA3-454E-8B90-24C374E1BA24}
 	EndGlobalSection
 EndGlobal

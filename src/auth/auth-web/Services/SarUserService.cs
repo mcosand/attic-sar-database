@@ -22,14 +22,16 @@ namespace Sar.Auth.Services
     private readonly IMemberInfoService _memberService;
     private readonly Func<IAuthDbContext> _dbFactory;
     private readonly ISendEmailService _emailService;
+    private readonly IConfigService _config;
     private readonly ILogger _log;
 
-    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, ISendEmailService email, ILogger log)
+    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, ISendEmailService email, IConfigService config, ILogger log)
     {
       _memberService = memberService;
       _dbFactory = dbFactory;
       _emailService = email;
-      _log = log; 
+      _config = config;
+      _log = log.ForContext<SarUserService>();
     }
 
     public override async Task AuthenticateExternalAsync(ExternalAuthenticationContext context)
@@ -96,6 +98,11 @@ namespace Sar.Auth.Services
 
           claims.Add(new Claim(Scopes.UnitsClaim, string.Join(",", member.Units.Select(f => f.Name))));
           claims.Add(new Claim(Scopes.MemberIdClaim, member.Id.ToString()));
+          string profileTemplate = _config["memberProfileTemplate"];
+          if (!string.IsNullOrWhiteSpace(profileTemplate))
+          {
+            claims.Add(new Claim(Constants.ClaimTypes.Profile, string.Format(profileTemplate, member.Id)));
+          }
         }
 
         claims.Add(new Claim(Constants.ClaimTypes.Email, account.Email));
@@ -109,7 +116,7 @@ namespace Sar.Auth.Services
 
     }
 
-    public async Task VerifyExternalCode(ClaimsIdentity identity, string email, string code)
+    public async Task<ProcessVerificationResult> VerifyExternalCode(ClaimsIdentity identity, string email, string code)
     {
       if (string.IsNullOrWhiteSpace(code))
       {
@@ -123,47 +130,50 @@ namespace Sar.Auth.Services
       using (var db = _dbFactory())
       {
         var verification = await db.Verifications.FirstOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId && f.Email == email);
-        if (verification == null)
+        if (verification == null || verification.Code != code)
         {
-          throw new InvalidOperationException("Verification code not found or is invalid");
-        }
-        if (verification.Code != code)
-        {
-          throw new InvalidOperationException("Verification code not found or is invalid");
+          _log.Information("Verification code {verifyCode} for {email} is not correct", code, email);
+          return ProcessVerificationResult.InvalidVerifyCode;
         }
 
         AccountRow account = null;
-        await ProcessVerification(email, provider, providerUserId,
+        var processResult = await ProcessVerification(email, provider, providerUserId,
           db,
           m =>
           {
-            account = new AccountRow { FirstName = m.FirstName, LastName = m.LastName, Email = email, MemberId = m.Id };
-            db.Accounts.Add(account);
+            account = db.Accounts.Where(f => f.MemberId == m.Id).FirstOrDefault();
+            if (account == null)
+            {
+              new AccountRow { FirstName = m.FirstName, LastName = m.LastName, Email = email, MemberId = m.Id };
+              db.Accounts.Add(account);
+            }
           },
           a => { account = a; });
+        if (processResult != ProcessVerificationResult.Success) return processResult;
 
         var login = new ExternalLoginRow { Account = account, Provider = provider, ProviderId = providerUserId };
         db.ExternalLogins.Add(login);
         db.Verifications.Remove(verification);
+        _log.Information("Associating login {provider}:{providerId} with {name}'s account", provider, providerUserId, account.FirstName + " " + account.LastName);
         await db.SaveChangesAsync();
 
-        
+        return ProcessVerificationResult.Success;
       }
     }
 
-    private async Task ProcessVerification(string email, string provider, string providerUserId,
+    private async Task<ProcessVerificationResult> ProcessVerification(string email, string provider, string providerUserId,
       IAuthDbContext db, Action<Member> memberAction, Action<AccountRow> accountAction)
     {
       var existingLogin = await db.ExternalLogins.FirstOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId);
       if (existingLogin != null)
       {
-        throw new UserErrorException("Login already registered", string.Format(
-          "{0} login {1} already registered to account {2} ({3} {4})",
+        _log.Warning("{provider} login {providerId} already registered to account {account} ({first} {last}",
           existingLogin.Provider,
           existingLogin.ProviderId,
           existingLogin.AccountId,
           existingLogin.Account.FirstName,
-          existingLogin.Account.LastName));
+          existingLogin.Account.LastName);
+        return ProcessVerificationResult.AlreadyRegistered;
       }
 
       var accounts = await db.Accounts.Where(f => f.Email == email).ToListAsync();
@@ -172,11 +182,13 @@ namespace Sar.Auth.Services
         var members = await _memberService.FindMembersByEmail(email);
         if (members.Count == 0)
         {
-          throw new NotFoundException(email + " not available for registration", "email", email);
+          _log.Warning("{email} does not exist in the database", email);
+          return ProcessVerificationResult.EmailNotAvailable;
         }
         else if (members.Count > 1)
         {
-          throw new MultipleMatchesException(email + " not available for registration", "email", email);
+          _log.Warning("{email} exists for multiple members: {@members}", email, members.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
+          return ProcessVerificationResult.EmailNotAvailable;
         }
         else if (memberAction != null)
         {
@@ -185,15 +197,18 @@ namespace Sar.Auth.Services
       }
       else if (accounts.Count > 1)
       {
-        throw new MultipleMatchesException(email + " not available for registration", "email", email);
+        _log.Warning("{email} exists for multiple accounts: {@accounts}", email, accounts.Select(f => new { Name = f.FirstName + " " + f.LastName, Id = f.Id }));
+        return ProcessVerificationResult.EmailNotAvailable;
       }
       else if (accountAction != null)
       {
         accountAction(accounts[0]);
       }
+
+      return ProcessVerificationResult.Success;
     }
 
-    public async Task SendExternalVerificationCode(ClaimsIdentity identity, string email)
+    public async Task<ProcessVerificationResult> SendExternalVerificationCode(ClaimsIdentity identity, string email)
     {
       if (string.IsNullOrWhiteSpace(email))
       {
@@ -206,7 +221,8 @@ namespace Sar.Auth.Services
 
       using (var db = _dbFactory())
       {
-        await ProcessVerification(email, provider, providerUserId, db, null, null);
+        var processresult = await ProcessVerification(email, provider, providerUserId, db, null, null);
+        if (processresult != ProcessVerificationResult.Success) return processresult;
 
         var verification = await db.Verifications.SingleOrDefaultAsync(f => f.Provider == provider && f.ProviderId == providerUserId);
         if (verification == null)
@@ -220,7 +236,10 @@ namespace Sar.Auth.Services
         verification.Email = email;
         await db.SaveChangesAsync();
 
+        _log.Information("Sending verification code to {email} for login {provider}:{providerId}", email, provider, providerUserId);
         await _emailService.SendEmail(email, "KCSARA Verification Code", "Your code: " + verification.Code);
+
+        return ProcessVerificationResult.Success;
       }
     }
   }

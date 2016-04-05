@@ -25,3 +25,7 @@
 md-input-container {
   margin-bottom: 0;
 }
+
+.text-danger {
+  color: #DD2C00
+}
