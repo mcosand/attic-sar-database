@@ -55,14 +55,24 @@
   }
   @if (Model.ExternalProviders.Any())
   {
-    <md-card flex>
+    <md-card flex flex-gt-xs="40" flex-gt-md="20">
       <md-card-title><md-card-title-text><span class="md-headline">External Login</span></md-card-title-text></md-card-title>
-      <md-card-content flex layout="column">
+      <md-card-content layout="column">
+        <p>Login with one of your existing accounts from another web site</p>
         @foreach (var provider in Model.ExternalProviders)
         {
-          <md-button href="@provider.Href">@provider.Text</md-button>
+          IHtmlString icon = new HtmlString(string.Empty);
+          if (string.Equals(provider.Type, "google", StringComparison.OrdinalIgnoreCase)) { icon = Html.Raw("<i class=\"fa fa-fw fa-google\" style=\"color: #EA4335\"></i> "); }
+          else if (string.Equals(provider.Type, "facebook", StringComparison.OrdinalIgnoreCase)) { icon = Html.Raw("<i class=\"fa fa-fw fa-facebook-official\" style=\"color: #3B5998\"></i> "); }
+          else if (ViewBag.OpenIdIcons.ContainsKey(provider.Type))
+          {
+            string iconName = ViewBag.OpenIdIcons[provider.Type];
+            string iconColor = ViewBag.OpenIdColors[provider.Type];
+            icon = Html.Raw("<i class=\"fa fa-fw " + iconName + "\" style=\"color: " + iconColor + "\"></i> ");
+          }
+          <md-button href="@provider.Href">@icon@provider.Text</md-button>
         }
       </md-card-content>
     </md-card>
   }
-  </div>
+</div>

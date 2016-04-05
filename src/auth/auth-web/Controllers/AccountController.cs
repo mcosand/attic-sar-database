@@ -1,20 +1,24 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
+using System.Linq;
 using System.Web.Mvc;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.ViewModels;
 using Sar.Auth.Services;
+using Sar.Services;
 
 namespace Sar.Auth.Controllers
 {
   public class AccountController : Controller
   {
     private readonly SarUserService _userService;
+    private readonly IConfigService _config;
 
-    public AccountController(SarUserService service)
+    public AccountController(SarUserService service, IConfigService config)
     {
       _userService = service;
+      _config = config;
     }
 
     #region Login
@@ -32,7 +36,11 @@ namespace Sar.Auth.Controllers
     /// </returns>
     public ActionResult Login(LoginViewModel model, SignInMessage message)
     {
-      return this.View(model);
+      var openIdProviders = _config["openId:providers"].Split(',');
+      ViewBag.OpenIdIcons = openIdProviders.ToDictionary(f => f, f => "fa-" + _config["openId:" + f + ":fa-icon"]);
+      ViewBag.OpenIdColors = openIdProviders.ToDictionary(f => f, f => _config["openId:" + f + ":icon-color"]);
+
+      return View(model);
     }
 
     #endregion
