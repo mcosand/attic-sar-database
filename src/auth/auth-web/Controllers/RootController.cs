@@ -13,5 +13,12 @@ namespace Sar.Auth.Controllers
     {
       return Content(string.Format("window.appRoot = '{0}';", Url.Content("~/")), "text/javascript");
     }
+
+    [Route(AuthWebApplication.SITEROOT)]
+    [HttpGet]
+    public ActionResult Home()
+    {
+      return View("Index");
+    }
   }
 }

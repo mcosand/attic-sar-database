@@ -106,6 +106,15 @@ namespace Sar.Auth {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to KCSARA Login Service.
+        /// </summary>
+        internal static string ThisServiceName {
+            get {
+                return ResourceManager.GetString("ThisServiceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown User.
         /// </summary>
         internal static string UnknownUserName {

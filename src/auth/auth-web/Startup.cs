@@ -62,8 +62,8 @@ namespace Sar.Auth
 
             var options = new IdentityServerOptions
             {
-              SiteName = "KCSARA Authentication Service",
-
+              SiteName = Strings.ThisServiceName,
+              EnableWelcomePage = false,
               SigningCertificate = Cert.Load(config["cert:key"]),
               Factory = factory,
               CspOptions = new CspOptions

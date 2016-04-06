@@ -132,6 +132,9 @@
   <data name="NotLoggedInExternalLogin" xml:space="preserve">
     <value>Not logged in with external login.</value>
   </data>
+  <data name="ThisServiceName" xml:space="preserve">
+    <value>KCSARA Login Service</value>
+  </data>
   <data name="UnknownUserName" xml:space="preserve">
     <value>Unknown User</value>
   </data>

@@ -251,6 +251,7 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
+    <Content Include="Views\Root\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
