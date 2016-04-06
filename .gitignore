@@ -1,4 +1,6 @@
 web.local.config
+cert.pfx
+
 logs/
 /publish/
 **/wwwroot/lib/

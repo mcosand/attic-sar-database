@@ -36,6 +36,7 @@ namespace Sar.Auth
           coreApp =>
           {
             var kernel = WebSetup.SetupDependencyInjection(RegisterServices);
+            var config = kernel.Get<IConfigService>();
 
             var userService = kernel.Get<SarUserService>();
             var clientStore = kernel.Get<IClientStore>();
@@ -63,7 +64,7 @@ namespace Sar.Auth
             {
               SiteName = "KCSARA Authentication Service",
 
-              SigningCertificate = Cert.Load(),
+              SigningCertificate = Cert.Load(config["cert:key"]),
               Factory = factory,
               CspOptions = new CspOptions
               {
