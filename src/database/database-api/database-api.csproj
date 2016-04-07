@@ -201,9 +201,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="web.local.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
