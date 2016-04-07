@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
@@ -26,26 +27,45 @@ namespace Sar.Auth.Services
     {
       using (var db = _dbFactory())
       {
-        return (await db.Clients.Where(f => f.ClientId == clientId)
-          .ToListAsync())
-          .Select(f => new Client
+        var row = await db.Clients.Where(f => f.ClientId == clientId).SingleOrDefaultAsync();
+        if (row == null) return null;
+        if (string.IsNullOrWhiteSpace(row.Secret))
+        {
+          return new Client
           {
-            ClientId = f.ClientId,
-            ClientName = f.DisplayName,
-            Enabled = f.Enabled,
+            ClientId = row.ClientId,
+            ClientName = row.DisplayName,
+            Enabled = row.Enabled,
             Flow = Flows.Implicit,
             RequireConsent = false,
             AllowRememberConsent = false,
-            RedirectUris = f.RedirectUris.Select(g => g.Uri).ToList(),
+            RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList(),
             PostLogoutRedirectUris = new List<string>(),
             AllowedScopes = new List<string> {
                 Constants.StandardScopes.OpenId,
                 Constants.StandardScopes.Profile,
                 Constants.StandardScopes.Email,
-            }.Concat((f.AddedScopes ?? "").Split(',')).ToList(),
+                "kcsara-profile"
+            }.Concat((row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)).ToList(),
             AllowAccessToAllScopes = true,
             AccessTokenType = AccessTokenType.Jwt
-          }).SingleOrDefault();
+          };
+        }
+        else
+        {
+          return new Client
+          {
+            ClientId = row.ClientId,
+            ClientName = row.DisplayName,
+            ClientSecrets = new List<Secret> { new Secret(row.Secret.Sha256()) },
+            Enabled = row.Enabled,
+            Flow = Flows.ClientCredentials,
+            AllowedScopes = (row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
+            Claims = row.Roles.Select(f => new Claim(Scopes.RolesClaim, f.Id)).ToList(),
+            PrefixClientClaims = false,
+            AccessTokenType = AccessTokenType.Jwt
+          };
+        }
       }
     }
   }

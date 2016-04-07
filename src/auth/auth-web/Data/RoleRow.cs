@@ -18,6 +18,7 @@ namespace Sar.Auth.Data
 
     public string Description { get; set; }
 
+    public virtual ICollection<ClientRow> Clients { get; set; }
     public virtual ICollection<AccountRow> Accounts { get; set; }
     public virtual ICollection<RoleRow> Children { get; set; }
     public virtual ICollection<RoleRow> Parents { get; set; }

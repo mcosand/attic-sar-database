@@ -10,7 +10,7 @@ namespace Sar.Auth
   {
     public static readonly string UnitsClaim = "units";
     public static readonly string MemberIdClaim = "memberId";
-    public static readonly string RolesClaim = "roles";
+    public static readonly string RolesClaim = "role";
 
     public static IEnumerable<Scope> Get()
     {
@@ -24,7 +24,8 @@ namespace Sar.Auth
               new ScopeClaim(MemberIdClaim),
               new ScopeClaim(RolesClaim)
             } },
-            new Scope { Name = "truck-api" },
+            new Scope { Name = "truck-api", Type = ScopeType.Resource },
+            new Scope { Name = "database-api", Type = ScopeType.Resource }
         };
     }
   }

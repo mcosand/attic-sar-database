@@ -249,6 +249,9 @@
     <EmbeddedResource Include="Migrations\201604061947287_AccountRoles.resx">
       <DependentUpon>201604061947287_AccountRoles.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604070754081_ClientSecret.resx">
+      <DependentUpon>201604070754081_ClientSecret.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -300,6 +303,10 @@
     <Compile Include="Migrations\201604061947287_AccountRoles.cs" />
     <Compile Include="Migrations\201604061947287_AccountRoles.Designer.cs">
       <DependentUpon>201604061947287_AccountRoles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604070754081_ClientSecret.cs" />
+    <Compile Include="Migrations\201604070754081_ClientSecret.Designer.cs">
+      <DependentUpon>201604070754081_ClientSecret.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />

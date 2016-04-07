@@ -27,5 +27,9 @@ namespace Sar.Auth.Data
 
     [MaxLength(255)]
     public string AddedScopes { get; set; }
+
+    public string Secret { get; set; }
+
+    public virtual ICollection<RoleRow> Roles { get; set; }
   }
 }
