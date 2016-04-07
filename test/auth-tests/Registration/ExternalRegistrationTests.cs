@@ -14,7 +14,7 @@ namespace Test.Auth.Registration
   public class SarUserServiceRegistrationTests
   {
     [Fact]
-    public async Task EmailNull()
+    public void EmailNull()
     {
       var args = new UserServiceBuilder();
 

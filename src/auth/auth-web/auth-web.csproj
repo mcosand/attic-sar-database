@@ -262,7 +262,6 @@
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
-    <None Include="web.local.config" />
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -390,7 +389,8 @@
     <Error Condition="!Exists('..\..\..\packages\Microsoft.Net.Compilers.1.2.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Net.Compilers.1.2.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>xcopy /y "$(ProjectDir)..\..\database\database-services\bin\$(ConfigurationName)" "$(ProjectDir)\bin"</PreBuildEvent>
+    <PreBuildEvent>xcopy /y "$(ProjectDir)..\..\database\database-services\bin\$(ConfigurationName)" "$(ProjectDir)\bin"
+if not exist "$(ProjectDir)Web.Release.config" copy "$(ProjectDir)Web.Release.config.template" "$(ProjectDir)Web.Release.config"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -14,11 +14,13 @@ namespace Test.Auth
     public Mock<ISendEmailService> EMails { get; private set; }
     public Mock<IConfigService> Config { get; private set; }
     public Mock<ILogger> Logger { get; private set; }
+    public Mock<IRolesService> Roles { get; private set; }
 
     public UserServiceBuilder()
     {
       DB = new TestDB<IAuthDbContext>();
       Members = new Mock<IMemberInfoService>(MockBehavior.Strict);
+      Roles = new Mock<IRolesService>(MockBehavior.Strict);
       EMails = new Mock<ISendEmailService>(MockBehavior.Strict);
       Config = new Mock<IConfigService>(MockBehavior.Strict);
       Logger = new Mock<ILogger>(MockBehavior.Strict);
@@ -27,7 +29,7 @@ namespace Test.Auth
 
     public SarUserService Build()
     {
-      return new SarUserService(() => DB.Object, Members.Object, EMails.Object, Config.Object, Logger.Object);
+      return new SarUserService(() => DB.Object, Members.Object,Roles.Object, EMails.Object, Config.Object, Logger.Object);
     }
   }
 }
