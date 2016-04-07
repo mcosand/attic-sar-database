@@ -22,14 +22,16 @@ namespace Sar.Auth.Services
   public class SarUserService : UserServiceBase
   {
     private readonly IMemberInfoService _memberService;
+    private readonly IRolesService _roles;
     private readonly Func<IAuthDbContext> _dbFactory;
     private readonly ISendEmailService _emailService;
     private readonly IConfigService _config;
     private readonly ILogger _log;
 
-    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, ISendEmailService email, IConfigService config, ILogger log)
+    public SarUserService(Func<IAuthDbContext> dbFactory, IMemberInfoService memberService, IRolesService roles, ISendEmailService email, IConfigService config, ILogger log)
     {
       _memberService = memberService;
+      _roles = roles;
       _dbFactory = dbFactory;
       _emailService = email;
       _config = config;
@@ -165,12 +167,22 @@ namespace Sar.Auth.Services
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
 
-          claims.Add(new Claim(Scopes.UnitsClaim, string.Join(",", member.Units.Select(f => f.Name))));
+          foreach (var unit in member.Units.Select(f => f.Name))
+          {
+            claims.Add(new Claim(Scopes.UnitsClaim, unit));
+          }
+
           claims.Add(new Claim(Scopes.MemberIdClaim, member.Id.ToString()));
+
           string profileTemplate = _config["memberProfileTemplate"];
           if (!string.IsNullOrWhiteSpace(profileTemplate))
           {
             claims.Add(new Claim(Constants.ClaimTypes.Profile, string.Format(profileTemplate, member.Id)));
+          }
+
+          foreach (var role in _roles.RolesForAccount(account.Id))
+          {
+            claims.Add(new Claim(Scopes.RolesClaim, role));
           }
         }
 

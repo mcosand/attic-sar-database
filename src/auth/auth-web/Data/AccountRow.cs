@@ -2,6 +2,7 @@
  * Copyright Matthew Cosand
  */
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -36,5 +37,7 @@ namespace Sar.Auth.Data
     [MaxLength(255)]
     public string LockReason { get; set; }
     public DateTime? Locked { get; set; }
+
+    public virtual ICollection<RoleRow> Roles { get; set; }
   }
 }

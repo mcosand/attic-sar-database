@@ -29,3 +29,7 @@ md-input-container {
 .text-danger {
   color: #DD2C00
 }
+
+md-card md-card-title {
+  flex-grow:0;
+}

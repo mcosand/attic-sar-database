@@ -246,12 +246,16 @@
     <EmbeddedResource Include="Migrations\201603242356298_Initial.resx">
       <DependentUpon>201603242356298_Initial.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604061947287_AccountRoles.resx">
+      <DependentUpon>201604061947287_AccountRoles.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
     <Content Include="Views\Root\Index.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -276,6 +280,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Data\ClientRow.cs" />
     <Compile Include="Data\ClientUriRow.cs" />
+    <Compile Include="Data\RoleRow.cs" />
     <Compile Include="Data\VerificationRow.cs" />
     <Compile Include="Data\AccountRow.cs" />
     <Compile Include="Data\AuthDbContext.cs" />
@@ -292,12 +297,17 @@
     <Compile Include="Migrations\201603242356298_Initial.Designer.cs">
       <DependentUpon>201603242356298_Initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201604061947287_AccountRoles.cs" />
+    <Compile Include="Migrations\201604061947287_AccountRoles.Designer.cs">
+      <DependentUpon>201604061947287_AccountRoles.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\VerifyCodeRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scopes.cs" />
     <Compile Include="Services\MvcViewService.cs" />
+    <Compile Include="Services\RolesService.cs" />
     <Compile Include="Services\SarClientStore.cs" />
     <Compile Include="Services\SarUserService.cs" />
     <Compile Include="Startup.cs" />

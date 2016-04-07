@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.IdentityModel.Tokens;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
@@ -23,8 +24,12 @@ namespace Sar.Database.Website
         RedirectUri = ConfigurationManager.AppSettings["auth:redirect"].Trim('/') + "/",
         ResponseType = "id_token",
         Scope = "openid email profile kcsara-profile",
+        TokenValidationParameters = new TokenValidationParameters
+        {
+          NameClaimType = "name"
+        },
         SignInAsAuthenticationType = "Cookies"
-        });
+      });
     }
   }
 }

@@ -12,10 +12,10 @@ namespace Sar.Auth
       var assembly = typeof(Cert).Assembly;
       var certFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cert.pfx");
 
-      bool useTest = File.Exists(certFilePath) && !string.IsNullOrWhiteSpace(keyPhrase);
+      bool useTest = !File.Exists(certFilePath) || string.IsNullOrWhiteSpace(keyPhrase);
       if (useTest)
       {
-        log.Warning("Signing certificate not setup. Using test certificate");
+        log.Warning("Signing certificate not setup {filepath}. Using test certificate", certFilePath);
       }
 
       // If no signing cert is available use the test cert.

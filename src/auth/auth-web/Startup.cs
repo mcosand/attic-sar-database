@@ -21,6 +21,7 @@ using Sar.Auth.Data;
 using Sar.Auth.Services;
 using Sar.Services;
 using Sar.Web;
+using Serilog;
 
 [assembly: OwinStartup(typeof(Sar.Auth.Startup))]
 
@@ -37,6 +38,7 @@ namespace Sar.Auth
           {
             var kernel = WebSetup.SetupDependencyInjection(RegisterServices);
             var config = kernel.Get<IConfigService>();
+            var log = kernel.Get<ILogger>();
 
             var userService = kernel.Get<SarUserService>();
             var clientStore = kernel.Get<IClientStore>();
@@ -64,7 +66,7 @@ namespace Sar.Auth
             {
               SiteName = Strings.ThisServiceName,
               EnableWelcomePage = false,
-              SigningCertificate = Cert.Load(config["cert:key"]),
+              SigningCertificate = Cert.Load(config["cert:key"], log),
               Factory = factory,
               CspOptions = new CspOptions
               {
@@ -114,6 +116,7 @@ namespace Sar.Auth
       kernel.Bind<Func<IAuthDbContext>>().ToMethod(ctx => () => new AuthDbContext());
       kernel.Bind<ISendEmailService>().To<DefaultSendMessageService>().InSingletonScope();
       kernel.Bind<IConfigService>().To<ConfigService>().InSingletonScope();
+      kernel.Bind<IRolesService>().To<RolesService>().InSingletonScope();
 
       var config = kernel.Get<IConfigService>();
 
