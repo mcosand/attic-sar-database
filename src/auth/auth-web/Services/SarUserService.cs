@@ -167,9 +167,14 @@ namespace Sar.Auth.Services
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
 
-          foreach (var unit in member.Units.Select(f => f.Name))
+          var units = member.Units.Select(f => f.Name);
+          foreach (var unit in units)
           {
             claims.Add(new Claim(Scopes.UnitsClaim, unit));
+          }
+          if (units.Any())
+          {
+            claims.Add(new Claim(Scopes.RolesClaim, "cdb.users"));
           }
 
           claims.Add(new Claim(Scopes.MemberIdClaim, member.Id.ToString()));
@@ -180,7 +185,8 @@ namespace Sar.Auth.Services
             claims.Add(new Claim(Constants.ClaimTypes.Profile, string.Format(profileTemplate, member.Id)));
           }
 
-          foreach (var role in _roles.RolesForAccount(account.Id))
+          var roles = _roles.RolesForAccount(account.Id);
+          foreach (var role in roles)
           {
             claims.Add(new Claim(Scopes.RolesClaim, role));
           }
