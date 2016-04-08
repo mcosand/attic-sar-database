@@ -74,6 +74,9 @@ namespace Sar.Auth
               },
               AuthenticationOptions = new AuthenticationOptions
               {
+                // Try to prevent "request too long" errors when authenticating with Google, etc
+                // https://github.com/IdentityServer/IdentityServer3/issues/1124
+                SignInMessageThreshold = 1,
                 IdentityProviders = ConfigureIdentityProviders,
                 LoginPageLinks = new LoginPageLink[] {
                             new LoginPageLink{

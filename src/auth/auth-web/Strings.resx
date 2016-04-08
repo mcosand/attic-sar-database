@@ -139,7 +139,7 @@
     <value>Unknown User</value>
   </data>
   <data name="UserPasswordNotCorrect" xml:space="preserve">
-    <value>Username of password is not correct</value>
+    <value>Username or password is not correct</value>
   </data>
   <data name="VerifyMessageHtml" xml:space="preserve">
     <value>Your code: {0}</value>

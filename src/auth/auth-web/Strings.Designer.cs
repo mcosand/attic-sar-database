@@ -124,7 +124,7 @@ namespace Sar.Auth {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Username of password is not correct.
+        ///   Looks up a localized string similar to Username or password is not correct.
         /// </summary>
         internal static string UserPasswordNotCorrect {
             get {

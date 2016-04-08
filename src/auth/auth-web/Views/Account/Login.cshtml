@@ -2,7 +2,7 @@
 @{
   ViewBag.Title = "Login";
 }
-<div layout="row" layout-xs="column" layout-align="center stretch" ng-controller="LoginCtrl" style="flex-grow:1">
+<div layout="row" layout-xs="column" layout-align="center stretch" ng-controller="LoginCtrl">
   @if (Model.ExternalProviders.Any())
   {
     <md-card flex flex-gt-xs="40" flex-gt-md="20">
@@ -27,18 +27,17 @@
   }
   @if (!string.IsNullOrWhiteSpace(Model.LoginUrl))
   {
-    @*@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-      {
-        <div class="alert alert-danger">
-          <strong>Error:</strong>
-          @Model.ErrorMessage
-        </div>
-      }*@
-    <form name="localForm" method="post" action="@Model.LoginUrl" flex flex-gt-xs="40" flex-gt-md="20">
-      <md-card>
+    <md-card flex flex-gt-xs="40" flex-gt-md="20" class="login-card">
+      <form name="localForm" method="post" action="@Model.LoginUrl">
         <md-card-title><md-card-title-text><span class="md-headline">KCSARA Account</span></md-card-title-text></md-card-title>
         <md-card-content layout="column">
           <p>Login with your King County Search and Rescue account.</p>
+          @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+          {
+            <div class="alert alert-danger">
+              @Model.ErrorMessage
+            </div>
+          }
           <input type="hidden" name="@Model.AntiForgery.Name" value="@Model.AntiForgery.Value" />
           <md-input-container>
             <label>Username</label>
@@ -79,7 +78,7 @@
         <md-card-actions layout="row" layout-align="end center">
           <md-button type="submit" ng-disabled="localForm.$invalid">Login</md-button>
         </md-card-actions>
-      </md-card>
-    </form>
+      </form>
+    </md-card>
   }
 </div>

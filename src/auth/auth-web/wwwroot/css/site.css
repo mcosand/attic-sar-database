@@ -1,4 +1,7 @@
-﻿body {
+﻿@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  [flex]
+   { flex: 1 1 auto; }
 }
 
 .alert {
@@ -15,7 +18,7 @@
 }
 
 .ng-cloak {
-  display:none;
+  display: none;
 }
 
 .hidden {
@@ -27,9 +30,13 @@ md-input-container {
 }
 
 .text-danger {
-  color: #DD2C00
+  color: #DD2C00;
 }
 
 md-card md-card-title {
-  flex-grow:0;
+  flex: 0 0 auto;
 }
+
+
+
+
