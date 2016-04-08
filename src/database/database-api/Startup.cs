@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright Matthew Cosand
  */
+using System.Configuration;
 using System.IdentityModel.Tokens;
 using IdentityServer3.AccessTokenValidation;
 using Microsoft.Owin;
@@ -17,7 +18,7 @@ namespace Sar.Database.Api
   {
     public void Configuration(IAppBuilder app)
     {
-      var kernel = WebSetup.SetupDependencyInjection(RegisterServices);
+      var kernel = WebSetup.SetupDependencyInjection(RegisterServices, ConfigurationManager.AppSettings);
       var config = kernel.Get<IConfigService>();
 
       JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();

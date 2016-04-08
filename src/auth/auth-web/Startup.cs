@@ -36,7 +36,7 @@ namespace Sar.Auth
       Action<IAppBuilder> buildApp =
           coreApp =>
           {
-            var kernel = WebSetup.SetupDependencyInjection(RegisterServices);
+            var kernel = WebSetup.SetupDependencyInjection(RegisterServices, ConfigurationManager.AppSettings);
             var config = kernel.Get<IConfigService>();
             var log = kernel.Get<ILogger>();
 

@@ -4,6 +4,7 @@
 namespace Sar.Web
 {
   using System;
+  using System.Collections.Specialized;
   using System.Web;
   using System.Web.Http;
   using System.Web.Http.ExceptionHandling;
@@ -16,24 +17,24 @@ namespace Sar.Web
 
   public static class WebSetup
   {
-    public static IKernel StartMvcAndWebApiWithNinject(IAppBuilder app, Action<IKernel> registerServices)
+    public static IKernel StartMvcAndWebApiWithNinject(IAppBuilder app, NameValueCollection configStrings, Action<IKernel> registerServices)
     {
-      var kernel = SetupDependencyInjection(registerServices);
+      var kernel = SetupDependencyInjection(registerServices, configStrings);
       SetupWebApi(app, kernel);
       return kernel;
     }
 
-    public static IKernel SetupDependencyInjection(Action<IKernel> registerServices)
+    public static IKernel SetupDependencyInjection(Action<IKernel> registerServices, NameValueCollection configStrings)
     {
       var kernel = new StandardKernel();
       var bootstrapper = new Bootstrapper();
       bootstrapper.Initialize(() => kernel);
       kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
 
-      Log.Logger = new LoggerConfiguration()
-          .MinimumLevel.Debug()
-          .WriteTo.RollingFile(AppDomain.CurrentDomain.BaseDirectory + "\\logs\\log-{Date}.txt")
-          .CreateLogger();
+      var logConfig = new LoggerConfiguration()
+          .MinimumLevel.Information()
+          .WriteTo.RollingFile(AppDomain.CurrentDomain.BaseDirectory + "\\logs\\log-{Date}.txt");
+      Log.Logger = logConfig.CreateLogger();
 
       kernel.Bind<ILogger>().ToConstant(Log.Logger);
       if (registerServices != null)

@@ -231,9 +231,11 @@ namespace Sar.Auth.Services
             account = db.Accounts.Where(f => f.MemberId == m.Id).FirstOrDefault();
             if (account == null)
             {
-              new AccountRow { FirstName = m.FirstName, LastName = m.LastName, Email = email, MemberId = m.Id };
+              account = new AccountRow { Email = email, MemberId = m.Id };
               db.Accounts.Add(account);
             }
+            account.FirstName = m.FirstName;
+            account.LastName = m.LastName;
           },
           a => { account = a; });
         if (processResult != ProcessVerificationResult.Success) return processResult;
