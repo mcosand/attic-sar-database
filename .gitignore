@@ -1,6 +1,8 @@
 web.local.config
 Web.Release.config
 cert.pfx
+cert.cer
+cert.pvk
 
 logs/
 /publish/
