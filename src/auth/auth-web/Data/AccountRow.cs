@@ -14,6 +14,7 @@ namespace Sar.Auth.Data
     public AccountRow()
     {
       Id = Guid.NewGuid();
+      Logins = new List<LoginLogRow>();
     }
 
     public Guid Id { get; set; }
@@ -39,5 +40,10 @@ namespace Sar.Auth.Data
     public DateTime? Locked { get; set; }
 
     public virtual ICollection<RoleRow> Roles { get; set; }
+
+    public virtual ICollection<LoginLogRow> Logins { get; set; }
+
+    public DateTime? Created { get; set; }
+    public DateTime? LastLogin { get; set; }
   }
 }

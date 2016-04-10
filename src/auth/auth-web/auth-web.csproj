@@ -265,6 +265,9 @@
     <EmbeddedResource Include="Migrations\201604070754081_ClientSecret.resx">
       <DependentUpon>201604070754081_ClientSecret.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604100504161_Dates.resx">
+      <DependentUpon>201604100504161_Dates.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -296,6 +299,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Data\ClientRow.cs" />
     <Compile Include="Data\ClientUriRow.cs" />
+    <Compile Include="Data\LoginLogRow.cs" />
     <Compile Include="Data\RoleRow.cs" />
     <Compile Include="Data\VerificationRow.cs" />
     <Compile Include="Data\AccountRow.cs" />
@@ -320,6 +324,10 @@
     <Compile Include="Migrations\201604070754081_ClientSecret.cs" />
     <Compile Include="Migrations\201604070754081_ClientSecret.Designer.cs">
       <DependentUpon>201604070754081_ClientSecret.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604100504161_Dates.cs" />
+    <Compile Include="Migrations\201604100504161_Dates.Designer.cs">
+      <DependentUpon>201604100504161_Dates.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />

@@ -42,35 +42,19 @@ namespace Sar.Auth.Services
     {
       using (var db = _dbFactory())
       {
-        var account = await db.ExternalLogins
-                        .Where(f => f.Provider == context.ExternalIdentity.Provider && f.ProviderId == context.ExternalIdentity.ProviderId)
-                        .Select(f => f.Account).SingleOrDefaultAsync();
+        var login = await db.ExternalLogins.Include(f => f.Account)
+                        .SingleOrDefaultAsync(f => f.Provider == context.ExternalIdentity.Provider && f.ProviderId == context.ExternalIdentity.ProviderId);
+        var account = login?.Account;
 
-        if (account != null)
-        {
-          if (account.Locked.HasValue)
-          {
-            context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
-          }
-          else
-          {
-            string name = account.FirstName + " " + account.LastName;
-            if (account.MemberId.HasValue)
-            {
-              var member = await _memberService.GetMember(account.MemberId.Value);
-              if (member == null)
-              {
-                throw new InvalidOperationException(LogStrings.MemberNotFound);
-              }
-              name = member.FirstName + " " + member.LastName;
-            }
-            context.AuthenticateResult = new AuthenticateResult(account.Id.ToString(), name, null, context.ExternalIdentity.Provider);
-          }
-        }
-        else
+        if (account == null)
         {
           context.AuthenticateResult = new AuthenticateResult("~/registerlogin", context.ExternalIdentity);
+          return;
         }
+
+        // This will be ignored if the user isn't registered.
+        login.LastLogin = DateTime.Now;
+        context.AuthenticateResult = await UpdateAccountOnLogin(db, account, context.ExternalIdentity);
       }
     }
 
@@ -80,49 +64,51 @@ namespace Sar.Auth.Services
 
       using (var db = _dbFactory())
       {
-        var account = await db.Accounts
-          .Where(f => f.Username == context.UserName)
-          .SingleOrDefaultAsync();
+        var account = await db.Accounts.SingleOrDefaultAsync(f => f.Username == context.UserName);
 
-        if (account != null && !string.IsNullOrWhiteSpace(account.PasswordHash))
+        context.AuthenticateResult = (account == null || string.IsNullOrWhiteSpace(account.PasswordHash) || !PasswordsMatch(context.Password, account.PasswordHash))
+                                    ? new AuthenticateResult(Strings.UserPasswordNotCorrect)
+                                    : await UpdateAccountOnLogin(db, account, null);
+      }
+    }
+
+    private async Task<AuthenticateResult> UpdateAccountOnLogin(IAuthDbContext db, AccountRow account, ExternalIdentity externalIdentity)
+    {
+      if (account.Locked.HasValue)
+      {
+        _log.Warning(LogStrings.LockedAccountAttempt, account);
+        return new AuthenticateResult(Strings.AccountLocked);
+      }
+
+      if (account.MemberId.HasValue)
+      {
+        var member = await _memberService.GetMember(account.MemberId.Value);
+        if (member == null)
         {
-          if (!PasswordsMatch(context.Password, account.PasswordHash))
-          {
-            context.AuthenticateResult = new AuthenticateResult(Strings.UserPasswordNotCorrect);
-            return;
-          }
+          _log.Error(LogStrings.LinkedMemberNotFound, account);
+          return new AuthenticateResult(Strings.AccountLocked);
+        }
 
-          if (account.Locked.HasValue)
-          {
-            _log.Warning(LogStrings.LockedAccountAttempt, account);
-            context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
-            return;
-          }
-
-          if (account.MemberId.HasValue)
-          {
-            var member = await _memberService.GetMember(account.MemberId.Value);
-            if (member == null)
-            {
-              context.AuthenticateResult = new AuthenticateResult(Strings.AccountLocked);
-              return;
-            }
-            if (account.FirstName != member.FirstName || account.LastName != member.LastName || account.Email != member.Email)
-            {
-              account.FirstName = member.FirstName;
-              account.LastName = member.LastName;
-              account.Email = member.Email;
-              await db.SaveChangesAsync();
-            }
-          }
-
-          if (string.IsNullOrWhiteSpace(account.FirstName) || string.IsNullOrWhiteSpace(account.LastName))
-          {
-            _log.Error(LogStrings.AccountHasNoName, account.Username);
-          }
-          context.AuthenticateResult = new AuthenticateResult(account.Id.ToString(), string.Format("{0} {1}", account.FirstName, account.LastName));
+        if (member != null && (account.FirstName != member.FirstName || account.LastName != member.LastName || account.Email != member.Email))
+        {
+          account.FirstName = member.FirstName;
+          account.LastName = member.LastName;
+          account.Email = member.Email;
         }
       }
+
+      account.LastLogin = DateTime.Now;
+      account.Logins.Add(new LoginLogRow { AccountId = account.Id, Time = account.LastLogin.Value, ProviderId = externalIdentity?.ProviderId });
+      await db.SaveChangesAsync();
+
+      if (string.IsNullOrWhiteSpace(account.FirstName) || string.IsNullOrWhiteSpace(account.LastName))
+      {
+        _log.Error(LogStrings.AccountHasNoName, account.Username);
+      }
+
+      return externalIdentity == null
+        ? new AuthenticateResult(account.Id.ToString(), account.FirstName + " " + account.LastName)
+        : new AuthenticateResult(account.Id.ToString(), account.FirstName + " " + account.LastName, null, externalIdentity.Provider);
     }
 
     public const int PasswordSaltLength = 24;
@@ -231,7 +217,7 @@ namespace Sar.Auth.Services
             account = db.Accounts.Where(f => f.MemberId == m.Id).FirstOrDefault();
             if (account == null)
             {
-              account = new AccountRow { Email = email, MemberId = m.Id };
+              account = new AccountRow { Email = email, MemberId = m.Id, Created = DateTime.Now };
               db.Accounts.Add(account);
             }
             account.FirstName = m.FirstName;
@@ -240,7 +226,7 @@ namespace Sar.Auth.Services
           a => { account = a; });
         if (processResult != ProcessVerificationResult.Success) return processResult;
 
-        var login = new ExternalLoginRow { Account = account, Provider = provider, ProviderId = providerUserId };
+        var login = new ExternalLoginRow { Account = account, Provider = provider, ProviderId = providerUserId, Created = DateTime.Now };
         db.ExternalLogins.Add(login);
         db.Verifications.Remove(verification);
         _log.Information(LogStrings.AssociatingExternalLogin, provider, providerUserId, account.FirstName + " " + account.LastName);

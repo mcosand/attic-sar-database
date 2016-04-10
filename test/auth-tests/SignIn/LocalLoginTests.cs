@@ -108,6 +108,7 @@ namespace Test.Auth.SignIn
 
       var args = new UserServiceBuilder();
       args.DB.Add(acct);
+      args.Logger.Setup(f => f.Error(LogStrings.LinkedMemberNotFound, acct));
       args.Members.Setup(f => f.GetMember(member.Id)).Returns(Task.FromResult((Member)null));
       var svc = args.Build();
 

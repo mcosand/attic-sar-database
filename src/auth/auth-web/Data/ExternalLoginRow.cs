@@ -23,6 +23,9 @@ namespace Sar.Auth.Data
     public Guid AccountId { get; set; }
 
     [ForeignKey("AccountId")]
-    public AccountRow Account { get; set; }
+    public virtual AccountRow Account { get; set; }
+
+    public DateTime? Created { get; set; }
+    public DateTime? LastLogin { get; set; }
   }
 }

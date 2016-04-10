@@ -18,6 +18,7 @@ namespace Sar.Auth.Data
 
     IDbSet<RoleRow> Roles { get; set; }
 
+    IDbSet<LoginLogRow> Logins { get; set; }
     Task<int> SaveChangesAsync();
   }
 
@@ -38,6 +39,7 @@ namespace Sar.Auth.Data
     public IDbSet<ExternalLoginRow> ExternalLogins { get; set; }
     public IDbSet<VerificationRow> Verifications { get; set; }
     public IDbSet<ClientRow> Clients { get; set; }
+    public IDbSet<LoginLogRow> Logins { get; set; }
 
     public IDbSet<RoleRow> Roles { get; set; }
   }

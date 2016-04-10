@@ -97,6 +97,15 @@ namespace Sar.Auth {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account {@account} has linked member, but member not in database.
+        /// </summary>
+        internal static string LinkedMemberNotFound {
+            get {
+                return ResourceManager.GetString("LinkedMemberNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login attempt for locked account {@account}.
         /// </summary>
         internal static string LockedAccountAttempt {
