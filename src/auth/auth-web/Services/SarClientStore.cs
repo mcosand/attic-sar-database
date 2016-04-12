@@ -36,6 +36,7 @@ namespace Sar.Auth.Services
             ClientId = row.ClientId,
             ClientName = row.DisplayName,
             Enabled = row.Enabled,
+            IdentityTokenLifetime = 60 * 30, // 30 minutes
             Flow = Flows.Implicit,
             RequireConsent = false,
             AllowRememberConsent = false,

@@ -101,6 +101,12 @@ namespace Sar.Auth.Controllers
 
     #region Permissions
 
+    // The custom MvcViewService wants to find this here in order to propagate the model.
+    public ActionResult Error(ErrorViewModel model)
+    {
+      return View(model);
+    }
+
     /// <summary>
     /// Loads the HTML for the client permissions page.
     /// </summary>
@@ -114,7 +120,6 @@ namespace Sar.Auth.Controllers
     {
       return this.View(model);
     }
-
     #endregion
   }
 }
