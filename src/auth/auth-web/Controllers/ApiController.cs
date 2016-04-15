@@ -25,7 +25,7 @@ namespace Sar.Auth
     }
 
     [HttpPost]
-    [Route(AuthWebApplication.SITEROOT + "externalVerificationCode")]
+    [Route("externalVerificationCode")]
     public async Task<object> ExternalVerificationCode(VerifyCodeRequest request)
     {
       var ctx = HttpContext.Current.GetOwinContext();
@@ -41,7 +41,7 @@ namespace Sar.Auth
     }
 
     [HttpPost]
-    [Route(AuthWebApplication.SITEROOT + "verifyExternalCode")]
+    [Route("verifyExternalCode")]
     public async Task<object> VerifyExternalCode(VerifyCodeRequest request)
     {
       var ctx = HttpContext.Current.GetOwinContext();

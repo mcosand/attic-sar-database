@@ -7,14 +7,14 @@ namespace Sar.Auth.Controllers
 {
   public class RootController : Controller
   {
-    [Route(AuthWebApplication.SITEROOT + "jsconfig")]
+    [Route("jsconfig")]
     [HttpGet]
     public ContentResult JSConfig()
     {
       return Content(string.Format("window.appRoot = '{0}';", Url.Content("~/")), "text/javascript");
     }
 
-    [Route(AuthWebApplication.SITEROOT)]
+    [Route("")]
     [HttpGet]
     public ActionResult Home()
     {

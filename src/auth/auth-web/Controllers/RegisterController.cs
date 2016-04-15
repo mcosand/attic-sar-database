@@ -8,29 +8,26 @@ namespace Sar.Auth.Controllers
   using System.Web.Mvc;
   using IdentityServer3.Core;
   using IdentityServer3.Core.Extensions;
-  using Sar.Auth.Services;
   using Serilog;
 
   public class RegisterController : Controller
   {
     private readonly ILogger _log;
-    private readonly SarUserService _userService;
 
-    public RegisterController(SarUserService service, ILogger log)
+    public RegisterController(ILogger log)
     {
-      _userService = service;
       _log = log;
     }
 
     // GET: Account
-    [Route(AuthWebApplication.SITEROOT + "register")]
+    [Route("register")]
     public ActionResult Register()
     {
       return View();
     }
 
     [HttpGet]
-    [Route(AuthWebApplication.SITEROOT + "registerlogin")]
+    [Route("registerlogin")]
     public async Task<ActionResult> RegisterLogin()
     {
       // this verifies that we have a partial signin from idsvr

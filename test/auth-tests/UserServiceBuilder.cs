@@ -1,4 +1,7 @@
-﻿using Moq;
+﻿/*
+ * Copyright Matthew Cosand
+ */
+using Moq;
 using Sar.Auth;
 using Sar.Auth.Data;
 using Sar.Auth.Services;
@@ -29,7 +32,7 @@ namespace Test.Auth
 
     public SarUserService Build()
     {
-      return new SarUserService(() => DB.Object, Members.Object,Roles.Object, EMails.Object, Config.Object, Logger.Object);
+      return new SarUserService(() => DB.Object, Members.Object, Roles.Object, EMails.Object, Config.Object, Logger.Object);
     }
   }
 }

@@ -23,6 +23,7 @@ namespace Sar.Auth.Data
     public string Username { get; set; }
     [MaxLength(500)]
     public string PasswordHash { get; set; }
+    public DateTime? PasswordDate { get; set; }
 
     [MaxLength(100)]
     public string FirstName { get; set; }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿/*
+ * Copyright Matthew Cosand
+ */
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -13,7 +16,6 @@ namespace Test.Auth.SignIn
 {
   public class LocalLoginTests
   {
-
     [Fact]
     public async Task Login()
     {

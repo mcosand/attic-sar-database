@@ -43,8 +43,11 @@ md-input-container {
 
 md-card md-card-title {
   flex: 0 0 auto;
+  padding-bottom:8px;
 }
-
+  md-card md-card-title.bordered {
+    border-bottom: solid 2px rgb(243,156,18)
+  }
 
 
 

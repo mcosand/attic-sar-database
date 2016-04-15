@@ -32,84 +32,70 @@ namespace Sar.Auth
   {
     public void Configuration(IAppBuilder app)
     {
+      var kernel = WebSetup.SetupDependencyInjection(RegisterServices, ConfigurationManager.AppSettings);
+      var config = kernel.Get<IConfigService>();
+      var log = kernel.Get<ILogger>();
 
-      Action<IAppBuilder> buildApp =
-          coreApp =>
-          {
-            var kernel = WebSetup.SetupDependencyInjection(RegisterServices, ConfigurationManager.AppSettings);
-            var config = kernel.Get<IConfigService>();
-            var log = kernel.Get<ILogger>();
+      var userService = kernel.Get<SarUserService>();
+      var clientStore = kernel.Get<IClientStore>();
+      var corsService = new DefaultCorsPolicyService { AllowAll = true };
 
-            var userService = kernel.Get<SarUserService>();
-            var clientStore = kernel.Get<IClientStore>();
-            var corsService = new DefaultCorsPolicyService { AllowAll = true };
+      var factory = new IdentityServerServiceFactory
+      {
+        UserService = new Registration<IUserService>(resolver => userService),
+        ClientStore = new Registration<IClientStore>(resolver => clientStore),
+        CorsPolicyService = new Registration<ICorsPolicyService>(resolver => corsService),
+        ViewService = new Registration<IViewService, MvcViewService<AccountController>>()
+      }
+      .UseInMemoryScopes(Scopes.Get(kernel.Get<Func<IAuthDbContext>>()));
 
-            var factory = new IdentityServerServiceFactory
-            {
-              UserService = new Registration<IUserService>(resolver => userService),
-              ClientStore = new Registration<IClientStore>(resolver => clientStore),
-              CorsPolicyService = new Registration<ICorsPolicyService>(resolver => corsService),
-              ViewService = new Registration<IViewService, MvcViewService<AccountController>>()
-            }
-            .UseInMemoryScopes(Scopes.Get());
-
-            // These registrations are also needed since these are dealt with using non-standard construction
-            factory.Register(new Registration<HttpContext>(resolver => HttpContext.Current));
-            factory.Register(new Registration<HttpContextBase>(resolver => new HttpContextWrapper(resolver.Resolve<HttpContext>())));
-            factory.Register(new Registration<HttpRequestBase>(resolver => resolver.Resolve<HttpContextBase>().Request));
-            factory.Register(new Registration<HttpResponseBase>(resolver => resolver.Resolve<HttpContextBase>().Response));
-            factory.Register(new Registration<HttpServerUtilityBase>(resolver => resolver.Resolve<HttpContextBase>().Server));
-            factory.Register(new Registration<HttpSessionStateBase>(resolver => resolver.Resolve<HttpContextBase>().Session));
+      // These registrations are also needed since these are dealt with using non-standard construction
+      factory.Register(new Registration<HttpContext>(resolver => HttpContext.Current));
+      factory.Register(new Registration<HttpContextBase>(resolver => new HttpContextWrapper(resolver.Resolve<HttpContext>())));
+      factory.Register(new Registration<HttpRequestBase>(resolver => resolver.Resolve<HttpContextBase>().Request));
+      factory.Register(new Registration<HttpResponseBase>(resolver => resolver.Resolve<HttpContextBase>().Response));
+      factory.Register(new Registration<HttpServerUtilityBase>(resolver => resolver.Resolve<HttpContextBase>().Server));
+      factory.Register(new Registration<HttpSessionStateBase>(resolver => resolver.Resolve<HttpContextBase>().Session));
 
 
-            var options = new IdentityServerOptions
-            {
-              SiteName = Strings.ThisServiceName,
-              EnableWelcomePage = false,
-              SigningCertificate = Cert.Load(config["cert:key"], log),
-              Factory = factory,
-              CspOptions = new CspOptions
-              {
-                ImgSrc = "'self' data:"
-              },
-              AuthenticationOptions = new AuthenticationOptions
-              {
-                // Try to prevent "request too long" errors when authenticating with Google, etc
-                // https://github.com/IdentityServer/IdentityServer3/issues/1124
-                SignInMessageThreshold = 1,
-                IdentityProviders = ConfigureIdentityProviders,
-                LoginPageLinks = new LoginPageLink[] {
+      var options = new IdentityServerOptions
+      {
+        SiteName = Strings.ThisServiceName,
+        EnableWelcomePage = false,
+        SigningCertificate = Cert.Load(config["cert:key"], log),
+        Factory = factory,
+        CspOptions = new CspOptions
+        {
+          ImgSrc = "'self' data:"
+        },
+        AuthenticationOptions = new IdentityServer3.Core.Configuration.AuthenticationOptions
+        {
+          // Try to prevent "request too long" errors when authenticating with Google, etc
+          // https://github.com/IdentityServer/IdentityServer3/issues/1124
+          SignInMessageThreshold = 1,
+          IdentityProviders = ConfigureIdentityProviders,
+          LoginPageLinks = new LoginPageLink[] {
                             new LoginPageLink{
                                 Text = "Register",
                                 //Href = "~/localregistration"
                                 Href = "localregistration"
                             }
                         }
-              },
+        },
 
-              EventsOptions = new EventsOptions
-              {
-                RaiseSuccessEvents = true,
-                RaiseErrorEvents = true,
-                RaiseFailureEvents = true,
-                RaiseInformationEvents = true
-              }
-            };
+        EventsOptions = new EventsOptions
+        {
+          RaiseSuccessEvents = true,
+          RaiseErrorEvents = true,
+          RaiseFailureEvents = true,
+          RaiseInformationEvents = true
+        }
+      };
 
-            coreApp.UseIdentityServer(options);
+      app.UseIdentityServer(options);
 
-            // This must come after .UseIdentityServer so APIs can get identity values off the OWIN context
-            WebSetup.SetupWebApi(app, kernel);
-          };
-
-      if (string.IsNullOrWhiteSpace(AuthWebApplication.SITEROOT))
-      {
-        buildApp(app);
-      }
-      else
-      {
-        app.Map("/" + AuthWebApplication.SITEROOT.Trim('/'), buildApp);
-      }
+      // This must come after .UseIdentityServer so APIs can get identity values off the OWIN context
+      WebSetup.SetupWebApi(app, kernel);
     }
 
     private static void RegisterServices(IKernel kernel)
@@ -180,7 +166,6 @@ namespace Sar.Auth
           && !string.IsNullOrWhiteSpace(caption)
           && !string.IsNullOrWhiteSpace(authority))
         {
-
           app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
           {
             AuthenticationType = type,
@@ -190,7 +175,6 @@ namespace Sar.Auth
             Caption = caption,
             SignInAsAuthenticationType = signInAsType
           });
-
         }
       }
     }

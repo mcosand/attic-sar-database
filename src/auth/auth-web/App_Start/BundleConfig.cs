@@ -24,6 +24,8 @@ namespace Kcsara.Database.Web
         "~/wwwroot/lib/angular-aria/angular-aria.js",
         "~/wwwroot/lib/angular-messages/angular-messages.js",
         "~/wwwroot/lib/angular-material/angular-material.js",
+        "~/wwwroot/js/sar-common.js",
+        "~/wwwroot/js/directives/server-error.js",
         "~/wwwroot/js/site.js",
         "~/wwwroot/js/page/login.js",
         "~/wwwroot/js/page/registerlogin.js"

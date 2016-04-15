@@ -24,7 +24,6 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <WebGreaseLibPath>..\..\..\packages\WebGrease.1.5.2\lib</WebGreaseLibPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,8 +48,8 @@
       <HintPath>..\..\..\packages\AntiXSS.4.3.0\lib\net40\AntiXssLibrary.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Antlr3.Runtime, Version=3.4.1.9004, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -165,6 +164,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -223,11 +223,11 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\WebActivatorEx.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+      <HintPath>..\..\..\packages\WebActivatorEx.2.1.0\lib\net40\WebActivatorEx.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="WebGrease, Version=1.5.2.14234, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
+    <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -236,13 +236,14 @@
     <Content Include="packages.config" />
     <Content Include="wwwroot\css\site.css" />
     <Content Include="wwwroot\css\vertical-stepper.css" />
+    <Content Include="wwwroot\js\directives\server-error.js" />
     <Content Include="wwwroot\js\page\registerlogin.js" />
     <Content Include="wwwroot\js\page\login.js" />
+    <Content Include="wwwroot\js\sar-common.js" />
     <Content Include="wwwroot\js\site.js" />
     <EmbeddedResource Include="idsrv3test.pfx" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Web.config" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Register\Register.cshtml" />
     <Content Include="Views\Account\Consent.cshtml" />
     <Content Include="Views\Account\LoggedOut.cshtml" />
@@ -268,6 +269,9 @@
     <EmbeddedResource Include="Migrations\201604100504161_Dates.resx">
       <DependentUpon>201604100504161_Dates.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604110528247_Dates2.resx">
+      <DependentUpon>201604110528247_Dates2.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -275,6 +279,7 @@
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
     <Content Include="Views\Root\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -297,14 +302,14 @@
     <Compile Include="Controllers\RegisterController.cs" />
     <Compile Include="Controllers\RootController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Data\AccountRow.cs" />
+    <Compile Include="Data\AuthDbContext.cs" />
     <Compile Include="Data\ClientRow.cs" />
     <Compile Include="Data\ClientUriRow.cs" />
+    <Compile Include="Data\ExternalLoginRow.cs" />
     <Compile Include="Data\LoginLogRow.cs" />
     <Compile Include="Data\RoleRow.cs" />
     <Compile Include="Data\VerificationRow.cs" />
-    <Compile Include="Data\AccountRow.cs" />
-    <Compile Include="Data\AuthDbContext.cs" />
-    <Compile Include="Data\ExternalLoginRow.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -328,6 +333,10 @@
     <Compile Include="Migrations\201604100504161_Dates.cs" />
     <Compile Include="Migrations\201604100504161_Dates.Designer.cs">
       <DependentUpon>201604100504161_Dates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604110528247_Dates2.cs" />
+    <Compile Include="Migrations\201604110528247_Dates2.Designer.cs">
+      <DependentUpon>201604110528247_Dates2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />

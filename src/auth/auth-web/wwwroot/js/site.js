@@ -1,5 +1,5 @@
-﻿angular.module('sarAuth', ['ngMaterial'])
-.config(['$mdThemingProvider', function ($mdThemingProvider) {
+﻿angular.module('sarAuth', ['ngMaterial', 'sarCommon'])
+  .config(['$mdThemingProvider', function ($mdThemingProvider) {
   //http://mcg.mbitson.com/
   $mdThemingProvider.definePalette('sar-yellow', {
     '50': '#ffffff',
@@ -43,6 +43,7 @@
   .accentPalette('sar-green')
   .backgroundPalette('grey');
 }]);
+
 
 angular.module('sarAuth').directive('serverError', function () {
   return {

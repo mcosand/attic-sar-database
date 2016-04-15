@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
@@ -16,7 +15,7 @@ namespace Sar.Auth.Services
 {
   public class SarClientStore : IClientStore
   {
-    private readonly Func<IAuthDbContext> _dbFactory;  
+    private readonly Func<IAuthDbContext> _dbFactory;
 
     public SarClientStore(Func<IAuthDbContext> dbFactory)
     {
@@ -29,44 +28,26 @@ namespace Sar.Auth.Services
       {
         var row = await db.Clients.Where(f => f.ClientId == clientId).SingleOrDefaultAsync();
         if (row == null) return null;
-        if (string.IsNullOrWhiteSpace(row.Secret))
+        return new Client
         {
-          return new Client
-          {
-            ClientId = row.ClientId,
-            ClientName = row.DisplayName,
-            Enabled = row.Enabled,
-            IdentityTokenLifetime = 60 * 30, // 30 minutes
-            Flow = Flows.Implicit,
-            RequireConsent = false,
-            AllowRememberConsent = false,
-            RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList(),
-            PostLogoutRedirectUris = new List<string>(),
-            AllowedScopes = new List<string> {
+          ClientId = row.ClientId,
+          ClientName = row.DisplayName,
+          ClientSecrets = string.IsNullOrWhiteSpace(row.Secret) ? new List<Secret>() : new List<Secret> { new Secret(row.Secret.Sha256()) },
+          Enabled = row.Enabled,
+          IdentityTokenLifetime = 60 * 30, // 30 minutes
+          Flow = Flows.Hybrid,
+          RequireConsent = false,
+          AllowRememberConsent = false,
+          RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList(),
+          PostLogoutRedirectUris = new List<string>(),
+          AllowedScopes = new List<string> {
                 Constants.StandardScopes.OpenId,
                 Constants.StandardScopes.Profile,
                 Constants.StandardScopes.Email,
                 "kcsara-profile"
             }.Concat((row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)).ToList(),
-            AllowAccessToAllScopes = true,
-            AccessTokenType = AccessTokenType.Jwt
-          };
-        }
-        else
-        {
-          return new Client
-          {
-            ClientId = row.ClientId,
-            ClientName = row.DisplayName,
-            ClientSecrets = new List<Secret> { new Secret(row.Secret.Sha256()) },
-            Enabled = row.Enabled,
-            Flow = Flows.ClientCredentials,
-            AllowedScopes = (row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            Claims = row.Roles.Select(f => new Claim(Scopes.RolesClaim, f.Id)).ToList(),
-            PrefixClientClaims = false,
-            AccessTokenType = AccessTokenType.Jwt
-          };
-        }
+          AccessTokenType = AccessTokenType.Jwt
+        };
       }
     }
   }

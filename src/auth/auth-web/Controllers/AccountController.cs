@@ -58,7 +58,7 @@ namespace Sar.Auth.Controllers
     /// </returns>
     public ActionResult Logout(LogoutViewModel model)
     {
-      return this.View(model);
+      return View(model);
     }
 
     #endregion
@@ -76,7 +76,7 @@ namespace Sar.Auth.Controllers
     /// </returns>
     public ActionResult LoggedOut(LoggedOutViewModel model)
     {
-      return this.View(model);
+      return View(model);
     }
 
     #endregion
@@ -94,7 +94,7 @@ namespace Sar.Auth.Controllers
     /// </returns>
     public ActionResult Consent(ConsentViewModel model)
     {
-      return this.View(model);
+      return View(model);
     }
 
     #endregion
@@ -118,7 +118,7 @@ namespace Sar.Auth.Controllers
     /// </returns>
     public ActionResult Permissions(ClientPermissionsViewModel model)
     {
-      return this.View(model);
+      return View(model);
     }
     #endregion
   }

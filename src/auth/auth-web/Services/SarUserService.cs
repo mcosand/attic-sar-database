@@ -93,7 +93,7 @@ namespace Sar.Auth.Services
         {
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
-          account.Email = member.Email;
+          if (!string.IsNullOrWhiteSpace(member.Email)) { account.Email = member.Email; }
         }
       }
 
@@ -149,7 +149,7 @@ namespace Sar.Auth.Services
           {
             throw new InvalidOperationException(LogStrings.MemberNotFound);
           }
-          account.Email = member.Email;
+          if (!string.IsNullOrWhiteSpace(member.Email)) { account.Email = member.Email; }
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
 
@@ -178,12 +178,14 @@ namespace Sar.Auth.Services
           }
         }
 
+        claims.Add(new Claim(Constants.ClaimTypes.Subject, account.Id.ToString()));
         claims.Add(new Claim(Constants.ClaimTypes.Email, account.Email));
         claims.Add(new Claim(Constants.ClaimTypes.GivenName, account.FirstName));
         claims.Add(new Claim(Constants.ClaimTypes.FamilyName, account.LastName));
         claims.Add(new Claim(Constants.ClaimTypes.Name, account.FirstName + " " + account.LastName));
 
-        context.IssuedClaims = claims.Where(f => context.RequestedClaimTypes.Contains(f.Type));
+
+        context.IssuedClaims = context.AllClaimsRequested ? claims : claims.Where(f => context.RequestedClaimTypes.Contains(f.Type));
       }
 
 
