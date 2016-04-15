@@ -272,6 +272,9 @@
     <EmbeddedResource Include="Migrations\201604110528247_Dates2.resx">
       <DependentUpon>201604110528247_Dates2.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604142354159_ClientCredentialFlow.resx">
+      <DependentUpon>201604142354159_ClientCredentialFlow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -337,6 +340,10 @@
     <Compile Include="Migrations\201604110528247_Dates2.cs" />
     <Compile Include="Migrations\201604110528247_Dates2.Designer.cs">
       <DependentUpon>201604110528247_Dates2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604142354159_ClientCredentialFlow.cs" />
+    <Compile Include="Migrations\201604142354159_ClientCredentialFlow.Designer.cs">
+      <DependentUpon>201604142354159_ClientCredentialFlow.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />
