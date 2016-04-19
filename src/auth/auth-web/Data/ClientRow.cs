@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IdentityServer3.Core.Models;
 
 namespace Sar.Auth.Data
 {
@@ -31,6 +32,7 @@ namespace Sar.Auth.Data
     public string Secret { get; set; }
 
     public virtual ICollection<RoleRow> Roles { get; set; }
-    public bool UseClientCredentialFlow { get; set; }
+
+    public Flows Flow { get; set; }
   }
 }

@@ -30,33 +30,47 @@ namespace Sar.Auth.Services
         var row = await db.Clients.Where(f => f.ClientId == clientId).SingleOrDefaultAsync();
         if (row == null) return null;
 
-        if (row.UseClientCredentialFlow)
+        var client = new Client
         {
-          return new Client          {
-            ClientId = row.ClientId,            ClientName = row.DisplayName,            ClientSecrets = new List<Secret> { new Secret(row.Secret.Sha256()) },            Enabled = row.Enabled,            Flow = Flows.ClientCredentials,            AllowedScopes = (row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList(),            Claims = row.Roles.Select(f => new Claim(Scopes.RolesClaim, f.Id)).ToList(),            PrefixClientClaims = false,            AccessTokenType = AccessTokenType.Jwt
-          };        }
-        else
+          ClientId = row.ClientId,
+          ClientName = row.DisplayName,
+          ClientSecrets = string.IsNullOrWhiteSpace(row.Secret) ? new List<Secret>() : new List<Secret> { new Secret(row.Secret.Sha256()) },
+          Enabled = row.Enabled,
+          IdentityTokenLifetime = 60 * 30, // 30 minutes
+          Flow = row.Flow,
+          RequireConsent = false,
+          AllowRememberConsent = false,
+          AccessTokenType = AccessTokenType.Jwt
+        };
+
+        switch (row.Flow)
         {
-          return new Client
-          {
-            ClientId = row.ClientId,
-            ClientName = row.DisplayName,
-            ClientSecrets = string.IsNullOrWhiteSpace(row.Secret) ? new List<Secret>() : new List<Secret> { new Secret(row.Secret.Sha256()) },
-            Enabled = row.Enabled,
-            IdentityTokenLifetime = 60 * 30, // 30 minutes
-            Flow = Flows.Hybrid,
-            RequireConsent = false,
-            AllowRememberConsent = false,
-            RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList(),
-            PostLogoutRedirectUris = new List<string>(),
-            AllowedScopes = new List<string> {
+          case Flows.ClientCredentials:
+            client.AllowedScopes = (row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            client.Claims = row.Roles.Select(f => new Claim(Scopes.RolesClaim, f.Id)).ToList();
+            client.PrefixClientClaims = false;
+            return client;
+          case Flows.Hybrid:
+            client.RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList();
+            client.PostLogoutRedirectUris = new List<string>();
+            client.AllowedScopes = new List<string> {
                 Constants.StandardScopes.OpenId,
                 Constants.StandardScopes.Profile,
                 Constants.StandardScopes.Email,
                 "kcsara-profile"
-            }.Concat((row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)).ToList(),
-            AccessTokenType = AccessTokenType.Jwt
-          };
+            }.Concat((row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)).ToList();
+            return client;
+          case Flows.AuthorizationCode:
+            client.RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList();
+            client.AllowedScopes = new List<string> {
+                Constants.StandardScopes.OpenId,
+                Constants.StandardScopes.Profile,
+                Constants.StandardScopes.Email,
+                "kcsara-profile"
+            }.Concat((row.AddedScopes ?? "").Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)).ToList();
+            return client;
+          default:
+            throw new NotSupportedException(row.Flow.ToString());
         }
       }
     }

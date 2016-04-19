@@ -275,6 +275,9 @@
     <EmbeddedResource Include="Migrations\201604142354159_ClientCredentialFlow.resx">
       <DependentUpon>201604142354159_ClientCredentialFlow.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604151909093_FlowType.resx">
+      <DependentUpon>201604151909093_FlowType.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -344,6 +347,10 @@
     <Compile Include="Migrations\201604142354159_ClientCredentialFlow.cs" />
     <Compile Include="Migrations\201604142354159_ClientCredentialFlow.Designer.cs">
       <DependentUpon>201604142354159_ClientCredentialFlow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604151909093_FlowType.cs" />
+    <Compile Include="Migrations\201604151909093_FlowType.Designer.cs">
+      <DependentUpon>201604151909093_FlowType.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Enums.cs" />
