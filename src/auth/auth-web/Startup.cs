@@ -1,19 +1,20 @@
-﻿/*
- * Copyright Matthew Cosand
- */
-using System;
+﻿using System;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using IdentityServer3.Core;
 using IdentityServer3.Core.Configuration;
+using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
 using Microsoft.Owin.Security.OpenIdConnect;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Ninject;
 using Owin;
 using Sar.Auth.Controllers;
@@ -45,7 +46,8 @@ namespace Sar.Auth
         UserService = new Registration<IUserService>(resolver => userService),
         ClientStore = new Registration<IClientStore>(resolver => clientStore),
         CorsPolicyService = new Registration<ICorsPolicyService>(resolver => corsService),
-        ViewService = new Registration<IViewService, MvcViewService<AccountController>>()
+        ViewService = new Registration<IViewService, MvcViewService<AccountController>>(),
+        TokenSigningService = new Registration<ITokenSigningService, MyTokenSigningService>()
       }
       .UseInMemoryScopes(Scopes.Get(kernel.Get<Func<IAuthDbContext>>()));
 
@@ -177,6 +179,24 @@ namespace Sar.Auth
           });
         }
       }
+    }
+  }
+
+  internal class MyTokenSigningService : DefaultTokenSigningService
+  {
+    public MyTokenSigningService(ISigningKeyService keyService) : base(keyService)
+    {
+    }
+
+    protected override string CreatePayload(Token token)
+    {
+      // Default implementation doesn't allow for much clock skew on the NotBefore claim.
+      // It's optional, so let's remove it.
+      var result = base.CreatePayload(token);
+      var payload = JsonConvert.DeserializeObject<JObject>(result);
+      payload.Remove(Constants.ClaimTypes.NotBefore);
+      result = JsonConvert.SerializeObject(payload);
+      return result;
     }
   }
 }
