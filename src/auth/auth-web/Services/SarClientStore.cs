@@ -50,6 +50,7 @@ namespace Sar.Auth.Services
             client.Claims = row.Roles.Select(f => new Claim(Scopes.RolesClaim, f.Id)).ToList();
             client.PrefixClientClaims = false;
             return client;
+          case Flows.Implicit:
           case Flows.Hybrid:
             client.RedirectUris = row.RedirectUris.Select(g => g.Uri).ToList();
             client.PostLogoutRedirectUris = new List<string>();

@@ -170,16 +170,17 @@ namespace Sar.Auth.Services
           {
             claims.Add(new Claim(Constants.ClaimTypes.Profile, string.Format(profileTemplate, member.Id)));
           }
-
-          var roles = _roles.RolesForAccount(account.Id);
-          foreach (var role in roles)
-          {
-            claims.Add(new Claim(Scopes.RolesClaim, role));
-          }
         }
 
+        var roles = _roles.RolesForAccount(account.Id);
+        foreach (var role in roles)
+        {
+          claims.Add(new Claim(Scopes.RolesClaim, role));
+        }
+      
         claims.Add(new Claim(Constants.ClaimTypes.Subject, account.Id.ToString()));
         claims.Add(new Claim(Constants.ClaimTypes.Email, account.Email));
+        claims.Add(new Claim(Constants.ClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean));
         claims.Add(new Claim(Constants.ClaimTypes.GivenName, account.FirstName));
         claims.Add(new Claim(Constants.ClaimTypes.FamilyName, account.LastName));
         claims.Add(new Claim(Constants.ClaimTypes.Name, account.FirstName + " " + account.LastName));
