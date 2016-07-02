@@ -14,6 +14,7 @@ using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services.Default;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Sar.Auth.Data;
 using Sar.Services;
 using Serilog;
@@ -154,7 +155,9 @@ namespace Sar.Auth.Services
           account.FirstName = member.FirstName;
           account.LastName = member.LastName;
 
-          var units = member.Units.Select(f => JsonConvert.SerializeObject(new { f.Id, f.Name }));
+          JsonSerializerSettings settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+
+          var units = member.Units.Select(f => JsonConvert.SerializeObject(new { f.Id, f.Name }, settings));
           foreach (var unit in units)
           {
             claims.Add(new Claim(Scopes.UnitsClaim, unit));
